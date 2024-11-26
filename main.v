@@ -27,7 +27,8 @@
 `define SERVICE4 = 4'b0001; // spdt switch4 on - service 4
 
 // D flip flop
-module DFF(clk, in, out, n);
+module DFF(clk, in, out);
+    parameter n = 1;
     input clk;
     input [n-1:0] in;
     output [n-1:0] out;
@@ -65,10 +66,10 @@ module Main(
     assign SPDT4_dff_in = resetn ? 0 : spdt_service[0];
     
     // update spdt switch states using d flip flops
-    DFF #(1) dff_SPDT1 (.clk(clk), .in(SPDT1_dff_in), .out(SPDT1), 1);
-    DFF #(1) dff_SPDT2 (.clk(clk), .in(SPDT2_dff_in), .out(SPDT2), 1);
-    DFF #(1) dff_SPDT3 (.clk(clk), .in(SPDT3_dff_in), .out(SPDT3), 1);
-    DFF #(1) dff_SPDT4 (.clk(clk), .in(SPDT4_dff_in), .out(SPDT4), 1);
+    DFF #(1) dff_SPDT1 (.clk(clk), .in(SPDT1_dff_in), .out(SPDT1));
+    DFF #(1) dff_SPDT2 (.clk(clk), .in(SPDT2_dff_in), .out(SPDT2));
+    DFF #(1) dff_SPDT3 (.clk(clk), .in(SPDT3_dff_in), .out(SPDT3));
+    DFF #(1) dff_SPDT4 (.clk(clk), .in(SPDT4_dff_in), .out(SPDT4));
 
     // assign push buttons
     wire push_u = push[0]; // is push up button pressed
@@ -98,10 +99,21 @@ module Main(
         .alarm_state(alarm_state)
     );
 
-    // wires that connect with 7-segment
+    // wire that connect with 7-segment
     wire [27:0] segValues;
+    wire [27:0] finalSegValues;
+
+    // reg that stores the output number array for the 7-segment
+    reg [15:0] num;
+
+    // use the NumArrayTo7SegmentArray module to convert number to 7-segment
+    NumArrayTo7SegmentArray numArrToSegArr (
+        .numberArray(num),
+        .segArray(segValues)
+    )
 
     // update 7 segment using d flip flop
+     DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
 
 endmodule
 
