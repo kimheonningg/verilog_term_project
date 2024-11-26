@@ -99,6 +99,10 @@ module Main(
         .alarm_state(alarm_state)
     );
 
+    // clock tick indicator led signal
+    wire clk_led;
+    assign clk_led = clk;
+
     // wire that connect with 7-segment
     wire [27:0] segValues;
     wire [27:0] finalSegValues;
@@ -114,14 +118,12 @@ module Main(
 
     // update 7 segment using d flip flop
      DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
-
 endmodule
 
 module NumArrayTo7SegmentArray(
     input [15:0] numberArray,
     output reg [27:0] segArray
 );
-
     wire [3:0] number1, number2, number3, number4;
     // number1 at the very left,
     // and number4 at the very right
@@ -143,14 +145,12 @@ module NumArrayTo7SegmentArray(
     assign segArray = {seg1, seg2, seg3, seg4}; 
     // seg1 is at the very left,
     // and  seg4 is at the very right
-
 endmodule
 
 module NumTo7Segment(
     input [3:0] number,
     output reg [6:0] seg
 );
-
     always @(*) begin
         case (number)
             4'b0000: seg = 7'b0111111; // 0
@@ -166,5 +166,4 @@ module NumTo7Segment(
             default: seg = 7'b0000000; // Blank for invalid input
         endcase
     end
-    
 endmodule
