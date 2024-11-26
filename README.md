@@ -14,10 +14,9 @@
 
 #### - module Main
 - **inputs:** <br>
-      input resetn, // reset <br>
       input [4:0] push, // 5 push buttons <br>
-      input [13:0] spdt, <br>
-      // 4 spdt switches for changing modes + 10 spdt switches for mini game <br>
+      input [14:0] spdt, <br>
+      // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset <br>
       input clk, // clock
 
 - **outputs:** <br>
