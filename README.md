@@ -10,28 +10,28 @@
 
 ## inputs / ouputs of each module
 
-### main 모듈:
+### main 모듈: `main.v` 파일
 
 - inputs: reset, push[4:0], spdt[3:0]
 - outputs: seg[27:0], led[9:0], clk_led
 
-### 기능1 모듈:
+### 기능1 모듈: `service_1.v` 파일
 
 - inputs: clk, resetn, spdt1, push_u, push_d, push_l, push_r
 - outputs: finish1, seg[15:0]
 
-### 기능2 모듈:
+### 기능2 모듈: `service_2.v` 파일
 
 - inputs: clk, resetn, spdt2, push_u, push_d, push_l, push_r
 - outputs: finish2, seg[15:0]
 
-### 기능3 모듈:
+### 기능3 모듈: `service_3.v` 파일
 
 - inputs: clk, resetn, spdt3, push_m
 - outputs: finish3, led, s[7:0], ss[7:0]
 
-### 기능4 모듈:
-Service_4_alram_check
+### 기능4 모듈: `service_4.v` 파일
+`Service_4_alarm_check`
 - inputs
     input clk,
     input resetn, // reset
@@ -44,7 +44,7 @@ Service_4_alram_check
 - outputs
     output [2:0] alarm_state
 
-Sercive_4_minigame
+`Service_4_minigame`
 - input
     input clk,
     input resetn,
@@ -56,5 +56,5 @@ Sercive_4_minigame
     output [15:0] count_state,
     output reg mini_game
 
-Service_4_random
+`Service_4_random`
 tbd
