@@ -44,7 +44,6 @@ module DFF(clk, in, out);
         out = in;
 endmodule
 
-// String Pattern Recognizer module
 module Service_4_alarm_check(
     input clk,
     input resetn, // reset
@@ -97,13 +96,13 @@ module Service_4_minigame(
     output [15:0] count_state,
     output reg mini_game
 );
-    // Ãß°¡µÈ º¯¼ö ¼±¾ğ
+    // ÃƒÃŸÂ°Â¡ÂµÃˆ ÂºÂ¯Â¼Ã¶ Â¼Â±Â¾Ã°
 
     wire cmp_game;
     wire [15:0] next;
     reg [15:0] next_count;
 
-    // random_led¿Í SPDTs ºñ±³
+    // random_ledÂ¿Ã SPDTs ÂºÃ±Â±Â³
     assign cmp_game = (random_led == SPDTs);
     DFF #(`CWIDTH) state_reg(clk, next, count_state);
     
