@@ -51,30 +51,16 @@
     output reg led   // LED for SPDT3
 
 ### 기능4 모듈: `service_4.v` 파일
-`Service_4_alarm_check`
-- **inputs**  <br/>
-    input clk, <br/>
-    input resetn, // reset  <br/>
-    input SPDT4, // input string (1bit)  <br/>
+(단일화 하는 경우)
+
+    input clk,
+    input resetn,     // Reset signal (active low)
+    input SPDT4,      // SPDT switch 3
+    input push_m,     // Push button
     input [15:0] current, // current_time  <br/>
     input [15:0] alarm, // alarm_time  <br/>
-    input push_m,  <br/>
-    input mini_game,  <br/>
-  
-- **outputs**  <br/>
-    output [2:0] alarm_state
+    input push_m,
+    input [9:0] SPDTs
 
-`Service_4_minigame`
-- **inputs**  <br/>
-    input clk,  <br/>
-    input resetn,  <br/>
-    input [2:0] alarm_state,  <br/>
-    input [9:0] random_led,  <br/>
-    input [9:0] SPDTs,  <br/>
-  
-- **outputs**  <br/>
-    output [15:0] count_state,  <br/>
-    output reg mini_game
-
-`Service_4_random`
-tbd
+    output [15:0] ? //Seg LEDs
+    output [15:0] ? //SPDT LEDs
