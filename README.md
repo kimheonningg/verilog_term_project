@@ -12,7 +12,7 @@
 
 ### main 모듈: `main.v` 파일
 
-#### - module Main
+`Main`
 - **inputs:** <br>
       input [4:0] push, // 5 push buttons <br>
       input [14:0] spdt, <br>
@@ -24,9 +24,9 @@
       output [9:0] led, // 10 leds control <br>
       output clk_led // clock led control <br>
 
-#### - module NumArrayTo7SegmentArray
+`NumArrayTo7SegmentArray`
 
-#### - module NumTo7Segment
+`NumTo7Segment`
 
 ### 기능1 모듈: `service_1.v` 파일
 
