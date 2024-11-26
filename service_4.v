@@ -33,6 +33,7 @@
 `define C3 16'b0000000000000011
 
 `define RWIDTH 10
+`define RN0 
 
 module DFF(clk, in, out);
     parameter n = 1; //width
@@ -44,6 +45,7 @@ module DFF(clk, in, out);
         out = in;
 endmodule
 
+// String Pattern Recognizer module
 module Service_4_alarm_check(
     input clk,
     input resetn, // reset
@@ -96,13 +98,13 @@ module Service_4_minigame(
     output [15:0] count_state,
     output reg mini_game
 );
-    // ÃƒÃŸÂ°Â¡ÂµÃˆ ÂºÂ¯Â¼Ã¶ Â¼Â±Â¾Ã°
+    // Ãß°¡µÈ º¯¼ö ¼±¾ğ
 
     wire cmp_game;
     wire [15:0] next;
     reg [15:0] next_count;
 
-    // random_ledÂ¿Ã SPDTs ÂºÃ±Â±Â³
+    // random_led¿Í SPDTs ºñ±³
     assign cmp_game = (random_led == SPDTs);
     DFF #(`CWIDTH) state_reg(clk, next, count_state);
     
@@ -143,3 +145,30 @@ module Service_4_minigame(
     assign next = resetn ? `C0 : next_count;
 
 endmodule
+
+
+module Service_4_random
+(
+	input clk, // clock
+	output [3:0] q, // output
+	output [9:0] hot
+);
+    
+    reg  [3:0]	r_reg = 4'b1011; // LFSRÀÇ ÃÊ±â°ª
+    wire 		feedback_value; 
+    
+    always @(posedge clk) begin
+        r_reg <= {r_reg[3:0], feedback_value}; // shift & feedback
+        r_reg = r_reg+1;
+    end
+    
+    assign feedback_value = r_reg[3] ^ r_reg[2]; // feedback value¸¦ assign
+    assign q = (r_reg >= 4'b1001 ? r_reg-4'b1001: r_reg); // 4°³ÀÇ Register °ªÀ» Ãâ·ÂÀ¸·Î ³»º¸³½´Ù.
+    assign hot = 10'b0000000001 << q;
+    
+
+endmodule
+
+
+
+

@@ -48,8 +48,10 @@ module Service_4_testbench(
     wire mini_game;
     reg[9:0] SPDTs;
     reg[9:0] random_led;
-    wire [9:0] random_led;
     wire [15:0] count_state;
+    
+    wire [3:0] q;
+    wire [9:0] hot;
     
     initial begin
         clk = 0;
@@ -150,11 +152,16 @@ module Service_4_testbench(
         .count_state(count_state),
         .mini_game(mini_game)
     );
-
+    
+    Service_4_random uut_random (
+        .clk(clk),
+        .q(q),
+        .hot(hot)
+    );
     // 출력 신호 모니터링
     initial begin
-        $monitor("Time=%0t | alarm_state=%b | mini_game=%b | random_led=%b | SPDTs=%b | count_state=%d",
-                 $time, alarm_state, mini_game, random_led, SPDTs, count_state);
+        $monitor("Time=%0t | alarm_state=%b | mini_game=%b | random_led=%b | SPDTs=%b | count_state=%d| q=%d | random_num=%d",
+                 $time, alarm_state, mini_game, random_led, SPDTs, count_state, q, hot);
     end
 
 endmodule
