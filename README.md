@@ -32,28 +32,28 @@
 
 ### 기능4 모듈: `service_4.v` 파일
 `Service_4_alarm_check`
-- inputs
-    input clk,
-    input resetn, // reset
-    input SPDT4, // input string (1bit)
-    input [15:0] current, // currnet_time
-    input [15:0] alarm, // alarm_time
-    input push_m,
-    input mini_game,
+- inputs  <br/>
+    input clk, <br/>
+    input resetn, // reset  <br/>
+    input SPDT4, // input string (1bit)  <br/>
+    input [15:0] current, // current_time  <br/>
+    input [15:0] alarm, // alarm_time  <br/>
+    input push_m,  <br/>
+    input mini_game,  <br/>
   
-- outputs
+- outputs  <br/>
     output [2:0] alarm_state
 
 `Service_4_minigame`
-- input
-    input clk,
-    input resetn,
-    input [2:0] alarm_state,
-    input [9:0] random_led,
-    input [9:0] SPDTs,
+- input  <br/>
+    input clk,  <br/>
+    input resetn,  <br/>
+    input [2:0] alarm_state,  <br/>
+    input [9:0] random_led,  <br/>
+    input [9:0] SPDTs,  <br/>
   
-- output
-    output [15:0] count_state,
+- output  <br/>
+    output [15:0] count_state,  <br/>
     output reg mini_game
 
 `Service_4_random`
