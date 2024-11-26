@@ -10,6 +10,11 @@
 
 ## inputs / ouputs of each module
 
+### main 모듈:
+
+- inputs: reset, push[4:0], spdt[3:0]
+- outputs: seg[27:0], led[9:0], clk_led
+
 ### 기능1 모듈:
 
 - inputs: clk, resetn, spdt1, push_u, push_d, push_l, push_r
