@@ -62,5 +62,6 @@
     input push_m,
     input [9:0] SPDTs
 
-    output [15:0] ? //Seg LEDs
+    output [15:0] num //Seg LEDs
     output [15:0] ? //SPDT LEDs
+    output finish4
