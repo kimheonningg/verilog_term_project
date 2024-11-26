@@ -12,8 +12,17 @@
 
 ### main 모듈: `main.v` 파일
 
-- inputs: resetn, push[4:0], spdt[3:0]
-- outputs: seg[27:0], led[9:0], clk_led
+- **inputs:** <br>
+      input resetn, // reset <br>
+      input [4:0] push, // 5 push buttons <br>
+      input [13:0] spdt, <br>
+      // 4 spdt switches for changing modes + 10 spdt switches for mini game <br>
+      input clk, // clock
+
+- **outputs:** <br>
+      output [27:0] seg, // 4 7-segment control <br>
+      output [9:0] led, // 10 leds control <br>
+      output clk_led // clock led control <br>
 
 ### 기능1 모듈: `service_1.v` 파일
 
@@ -32,7 +41,7 @@
 
 ### 기능4 모듈: `service_4.v` 파일
 `Service_4_alarm_check`
-- inputs  <br/>
+- **inputs**  <br/>
     input clk, <br/>
     input resetn, // reset  <br/>
     input SPDT4, // input string (1bit)  <br/>
@@ -41,18 +50,18 @@
     input push_m,  <br/>
     input mini_game,  <br/>
   
-- outputs  <br/>
+- **outputs**  <br/>
     output [2:0] alarm_state
 
 `Service_4_minigame`
-- input  <br/>
+- **inputs**  <br/>
     input clk,  <br/>
     input resetn,  <br/>
     input [2:0] alarm_state,  <br/>
     input [9:0] random_led,  <br/>
     input [9:0] SPDTs,  <br/>
   
-- output  <br/>
+- **outputs**  <br/>
     output [15:0] count_state,  <br/>
     output reg mini_game
 
