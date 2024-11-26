@@ -13,13 +13,11 @@
 ### main 모듈: `main.v` 파일
 
 `Main`
-- **inputs:** <br>
       input [4:0] push, // 5 push buttons <br>
       input [14:0] spdt, <br>
       // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset <br>
       input clk, // clock
-
-- **outputs:** <br>
+      
       output [27:0] seg, // 4 7-segment control <br>
       output [9:0] led, // 10 leds control <br>
       output clk_led // clock led control <br>
