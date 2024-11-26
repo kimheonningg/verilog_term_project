@@ -13,14 +13,14 @@
 ### main 모듈: `main.v` 파일
 
 `Main`
-      input [4:0] push, // 5 push buttons <br>
-      input [14:0] spdt, <br>
-      // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset <br>
+      input [4:0] push, // 5 push buttons
+      input [14:0] spdt,
+      // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset
       input clk, // clock
       
-      output [27:0] seg, // 4 7-segment control <br>
-      output [9:0] led, // 10 leds control <br>
-      output clk_led // clock led control <br>
+      output [27:0] seg, // 4 7-segment control
+      output [9:0] led, // 10 leds control
+      output clk_led // clock led control
 
 `NumArrayTo7SegmentArray`
 
@@ -42,6 +42,7 @@
     input resetn,     // Reset signal (active low)
     input SPDT3,      // SPDT switch 3
     input push_m,     // Push button
+    
     output reg [3:0] num1, // 7-segment digit 1 (tens of seconds)
     output reg [3:0] num2, // 7-segment digit 2 (units of seconds)
     output reg [3:0] num3, // 7-segment digit 3 (tens of hundredths)
