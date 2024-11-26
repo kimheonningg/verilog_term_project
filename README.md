@@ -31,3 +31,30 @@
 - outputs: finish3, led, s[7:0], ss[7:0]
 
 ### 기능4 모듈:
+Service_4_alram_check
+- inputs
+    input clk,
+    input resetn, // reset
+    input SPDT4, // input string (1bit)
+    input [15:0] current, // currnet_time
+    input [15:0] alarm, // alarm_time
+    input push_m,
+    input mini_game,
+  
+- outputs
+    output [2:0] alarm_state
+
+Sercive_4_minigame
+- input
+    input clk,
+    input resetn,
+    input [2:0] alarm_state,
+    input [9:0] random_led,
+    input [9:0] SPDTs,
+  
+- output
+    output [15:0] count_state,
+    output reg mini_game
+
+Service_4_random
+tbd
