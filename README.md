@@ -12,7 +12,7 @@
 
 ### main 모듈: `main.v` 파일
 
-- inputs: reset, push[4:0], spdt[3:0]
+- inputs: resetn, push[4:0], spdt[3:0]
 - outputs: seg[27:0], led[9:0], clk_led
 
 ### 기능1 모듈: `service_1.v` 파일
