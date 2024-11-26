@@ -36,8 +36,15 @@
 
 ### 기능3 모듈: `service_3.v` 파일
 
-- inputs: clk, resetn, spdt3, push_m
-- outputs: finish3, led, s[7:0], ss[7:0]
+    input clk,        // Main clock
+    input resetn,     // Reset signal (active low)
+    input SPDT3,      // SPDT switch 3
+    input push_m,     // Push button
+    output reg [3:0] seg1, // 7-segment digit 1 (tens of seconds)
+    output reg [3:0] seg2, // 7-segment digit 2 (units of seconds)
+    output reg [3:0] seg3, // 7-segment digit 3 (tens of hundredths)
+    output reg [3:0] seg4, // 7-segment digit 4 (units of hundredths)
+    output reg led   // LED for SPDT3
 
 ### 기능4 모듈: `service_4.v` 파일
 `Service_4_alarm_check`
