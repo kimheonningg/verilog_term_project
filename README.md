@@ -13,6 +13,7 @@
 ### main 모듈: `main.v` 파일
 
 `Main`
+
       input [4:0] push, // 5 push buttons
       input [14:0] spdt,
       // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset
