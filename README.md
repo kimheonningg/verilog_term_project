@@ -31,12 +31,12 @@
 ### 기능1 모듈: `service_1.v` 파일
 
 - inputs: clk, resetn, spdt1, push_u, push_d, push_l, push_r
-- outputs: finish1, seg[15:0]
+- outputs: finish1, num[15:0]
 
 ### 기능2 모듈: `service_2.v` 파일
 
 - inputs: clk, resetn, spdt2, push_u, push_d, push_l, push_r
-- outputs: finish2, seg[15:0]
+- outputs: finish2, num[15:0]
 
 ### 기능3 모듈: `service_3.v` 파일
 
@@ -44,10 +44,10 @@
     input resetn,     // Reset signal (active low)
     input SPDT3,      // SPDT switch 3
     input push_m,     // Push button
-    output reg [3:0] seg1, // 7-segment digit 1 (tens of seconds)
-    output reg [3:0] seg2, // 7-segment digit 2 (units of seconds)
-    output reg [3:0] seg3, // 7-segment digit 3 (tens of hundredths)
-    output reg [3:0] seg4, // 7-segment digit 4 (units of hundredths)
+    output reg [3:0] num1, // 7-segment digit 1 (tens of seconds)
+    output reg [3:0] num2, // 7-segment digit 2 (units of seconds)
+    output reg [3:0] num3, // 7-segment digit 3 (tens of hundredths)
+    output reg [3:0] num4, // 7-segment digit 4 (units of hundredths)
     output reg led   // LED for SPDT3
 
 ### 기능4 모듈: `service_4.v` 파일
