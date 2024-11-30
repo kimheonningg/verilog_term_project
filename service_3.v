@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Seoul National University. ECE. Logic Design
-// Engineer: Junho PArk
+// Engineer: Junho Park
 // 
 // Create Date: 2024/11/26 17:04:35
 // Design Name: 
@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Stopwatch implementation with 16-bit register for segment display
 // 
 // Dependencies: 
 // 
@@ -19,16 +19,20 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// String Pattern Recognizer module
+// Define state assignments
+`define SWIDTH 3 // State width
+`define S0 3'b000 // default
+`define S1 3'b001 // SPDT ON, waiting push_m
+`define S2 3'b010 // Stopwatch running
+`define S3 3'b100 // Stopwatch paused
+
+// Stopwatch module
 module Service_3_StopWatch(
     input clk,        // Main clock
     input resetn,     // Reset signal (active low)
     input SPDT3,      // SPDT switch 3
     input push_m,     // Push button
-    output reg [3:0] seg1, // 7-segment digit 1 (tens of seconds)
-    output reg [3:0] seg2, // 7-segment digit 2 (units of seconds)
-    output reg [3:0] seg3, // 7-segment digit 3 (tens of hundredths)
-    output reg [3:0] seg4, // 7-segment digit 4 (units of hundredths)
+    output reg [15:0] segments, // Combined segments for seg1, seg2, seg3, seg4
     output reg led,   // LED for SPDT3
     output reg finish3
 );
@@ -42,13 +46,6 @@ module Service_3_StopWatch(
     reg [6:0] hundredths;  // 1/100 seconds (ss)
     reg [2:0] stopwatch_state, next_state; // State registers
     reg running;           // Stopwatch running flag
-
-    // State definitions
-    `define SWIDTH 3
-    `define S0 3'b000 // Idle
-    `define S1 3'b001 // Stopwatch initialized
-    `define S2 3'b010 // Stopwatch running
-    `define S3 3'b100 // Stopwatch paused
 
     // State transitions and control logic
     always @(posedge clk) begin
@@ -120,25 +117,28 @@ module Service_3_StopWatch(
         endcase
     end
 
-    // Convert time to 7-segment display values
+    // Convert time to 7-segment display values (using a 16-bit register)
     always @(*) begin
         // Seconds
-        seg1 = seconds / 10; // Tens of seconds
-        seg2 = seconds % 10; // Units of seconds
+        segments[15:12] = seconds / 10; // Tens of seconds
+        segments[11:8]  = seconds % 10; // Units of seconds
 
         // Hundredths of a second
-        seg3 = hundredths / 10; // Tens of hundredths
-        seg4 = hundredths % 10; // Units of hundredths
+        segments[7:4]   = hundredths / 10; // Tens of hundredths
+        segments[3:0]   = hundredths % 10; // Units of hundredths
     end
-    always @(posedge clk) begin // is the case division good?????
-    if (!resetn) begin
-        finish3 <= 0; // Reset the finish flag
-    end else if (!SPDT3) begin
-        finish3 <= 1; // Set finish flag when SPDT3 is turned off
-    end else begin
-        finish3 <= 0; // Clear the finish flag when SPDT3 is on
+
+    // Finish flag handling
+    always @(posedge clk) begin
+        if (!resetn) begin
+            finish3 <= 0; // Reset the finish flag
+        end else if (!SPDT3) begin
+            finish3 <= 1; // Set finish flag when SPDT3 is turned off
+        end else begin
+            finish3 <= 0; // Clear the finish flag when SPDT3 is on
+        end
     end
-end
 
 endmodule
+
 
