@@ -12,7 +12,7 @@ module tb;
   reg resetn;
   reg spdt2;
   reg u, d, l, r;
-  wire [3:0] an;
+  wire [3:0] sel;
   wire finish2;
   reg finish;
   wire [15:0] alarm;
@@ -107,7 +107,7 @@ module tb;
     .push_l(l),
     .push_r(r),
 
-    .an(an),
+    .sel(sel),
     .finish2(finish2),
     .alarm(alarm)
   );
