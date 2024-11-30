@@ -50,11 +50,9 @@
     input push_d,
     input push_l,
     input push_r,
-    input [15:0] set_time, // time set from service_1. displayed after done.
 
     output [3:0] an,
     output reg finish2,
-    output reg [15:0] num, // segment number. msb(left) to lsb(right)
     output reg [15:0] alarm // alarm time. not displayed, but passed to top module.
 
 ### 기능3 모듈: `service_3.v` 파일
