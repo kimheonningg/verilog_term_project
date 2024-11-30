@@ -84,7 +84,6 @@ module Main(
 
     // wires that connect with 7-segment
     wire [27:0] segValues;
-    wire [27:0] finalSegValues;
 
     // wire for the output number array for the 7-segment
     wire [15:0] num;
@@ -158,8 +157,6 @@ module Main(
         .segArray(segValues)
     )
 
-    // update 7 segment using d flip flop
-    DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
 endmodule
 
 module NumArrayTo7SegmentArray(
