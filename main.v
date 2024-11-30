@@ -79,25 +79,12 @@ module Main(
     wire push_m = push[4]; // is push middle button pressed
 
     // store current time and alarm time
-    reg [15:0] current; // current time
-    reg [15:0] alarm; // alarm time
+    reg [15:0] current_time; // current time
+    reg [15:0] alarm_time; // alarm time
 
     reg [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
 
-    // instantiate modules
-    // Service_1_ service_1();
-    // Service_2_ service_2();
-    // Service_3_ service_3();
-    Service_4_alarm_check service_4(
-        .clk(clk), 
-        .resetn(resetn), 
-        .SPDT4(SPDT4), 
-        .current(current),
-        .alarm(alarm),
-        .push_m(push_m),
-        .mini_game(),
-        .alarm_state(alarm_state)
-    );
+    reg [3:0] which_seg_on; // one-hot style, tells which location segment is on
 
     // clock tick indicator led signal
     wire clk_led;
@@ -109,6 +96,45 @@ module Main(
 
     // reg that stores the output number array for the 7-segment
     reg [15:0] num;
+
+    // instantiate modules
+    Service_1_time_set service_1(
+        .clk(clk),
+        .resetn(resetn),
+        .spdt1(SPDT1),
+        .push_u(push_u),
+        .push_d(push_d),
+        .push_l(push_l),
+        .push_r(push_r),
+        .an(which_seg_on),
+        .finish1(finish),
+        .num(num)
+    );
+    Service_2_alarm_set service_2(
+        .clk(clk),
+        .resetn(resetn),
+        .spdt2(SPDT2),
+        .push_u(push_u),
+        .push_d(push_d),
+        .push_l(push_l),
+        .push_r(push_r),
+        .set_time(current_time),
+        .an(which_seg_on),
+        .finish2(finish),
+        .num(num),
+        .alarm(alarm_time)
+    );
+    // Service_3_ service_3();
+    Service_4_alarm_check service_4(
+        .clk(clk), 
+        .resetn(resetn), 
+        .SPDT4(SPDT4), 
+        .current(current_time),
+        .alarm(alarm_time),
+        .push_m(push_m),
+        .mini_game(),
+        .alarm_state(alarm_state)
+    );
 
     // use the NumArrayTo7SegmentArray module to convert number to 7-segment
     NumArrayTo7SegmentArray numArrToSegArr (
