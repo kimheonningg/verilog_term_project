@@ -7,18 +7,14 @@ date: 2024/11/30
 
 module tb;
 
-  `define expected1 16'b0000_1001_0011_1000 // alarm
-  `define expected2 16'b0001_0110_0011_0000 // set time
+  `define expected 16'b0000_1001_0011_1000 // alarm
   reg clk;
   reg resetn;
   reg spdt2;
   reg u, d, l, r;
-  reg [15:0] set_time;
-  wire [15:0] set_time_in;
   wire [3:0] an;
   wire finish2;
   reg finish;
-  wire [15:0] num;
   wire [15:0] alarm;
 
   initial begin
@@ -33,7 +29,6 @@ module tb;
     d = 0;
     r = 0;
     l = 0;
-    set_time = 16'b0001_0110_0011_0000; // 16:30
   end
   
   initial begin
@@ -91,16 +86,10 @@ module tb;
   always @(posedge clk) begin
     finish <= finish2;
     if (finish) begin
-      if (alarm == `expected1) $display("alarm is correct!\n");
+      if (alarm == `expected) $display("alarm is correct!\n");
       else begin
         $display("result is different.\n");
         $display("your result:%b", alarm);
-      end
-
-      if (num == `expected2) $display("displayed set time is correct!\n");
-      else begin
-        $display("result is different.\n");
-        $display("your result:%b", num);
       end
 
       $display("test done\n");
@@ -108,7 +97,6 @@ module tb;
     end
   end
   
-  assign set_time_in = set_time;
   
   Service_2_alarm_set u_alarm_set (
     .clk(clk),
@@ -118,11 +106,9 @@ module tb;
     .push_d(d),
     .push_l(l),
     .push_r(r),
-    .set_time(set_time_in),
 
     .an(an),
     .finish2(finish2),
-    .num(num),
     .alarm(alarm)
   );
 endmodule
