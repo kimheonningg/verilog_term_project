@@ -20,7 +20,7 @@
       input clk, // clock
       
       output [27:0] seg, // 4 7-segment control
-      output [9:0] led, // 10 leds control
+      output [13:0] led, // 4 spdt leds + 10 mini game leds control
       output clk_led // clock led control
 
 `NumArrayTo7SegmentArray`
