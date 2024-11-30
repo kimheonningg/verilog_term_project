@@ -30,12 +30,12 @@
 ### 기능1 모듈: `service_1.v` 파일
 
 - inputs: clk, resetn, spdt1, push_u, push_d, push_l, push_r
-- outputs: finish1, num[15:0]
+- outputs: [3:0] an, finish1, num[15:0]
 
 ### 기능2 모듈: `service_2.v` 파일
 
 - inputs: clk, resetn, spdt2, push_u, push_d, push_l, push_r
-- outputs: finish2, num[15:0]
+- outputs: [3:0] an, finish2, num[15:0]
 
 ### 기능3 모듈: `service_3.v` 파일
 
