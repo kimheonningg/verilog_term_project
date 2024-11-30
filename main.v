@@ -57,19 +57,11 @@ module Main(
     wire resetn = spdt[0]; // 1 spdt switch for reset
 
     // assign service buttons 
-    wire SPDT1_dff_in, SPDT2_dff_in, SPDT3_dff_in, SPDT4_dff_in;
     wire SPDT1, SPDT2, SPDT3, SPDT4;
-
-    assign SPDT1_dff_in = resetn ? 0 : spdt_service[3];
-    assign SPDT2_dff_in = resetn ? 0 : spdt_service[2];
-    assign SPDT3_dff_in = resetn ? 0 : spdt_service[1];
-    assign SPDT4_dff_in = resetn ? 0 : spdt_service[0];
-    
-    // update spdt switch states using d flip flops
-    DFF #(1) dff_SPDT1 (.clk(clk), .in(SPDT1_dff_in), .out(SPDT1));
-    DFF #(1) dff_SPDT2 (.clk(clk), .in(SPDT2_dff_in), .out(SPDT2));
-    DFF #(1) dff_SPDT3 (.clk(clk), .in(SPDT3_dff_in), .out(SPDT3));
-    DFF #(1) dff_SPDT4 (.clk(clk), .in(SPDT4_dff_in), .out(SPDT4));
+    assign SPDT1 = resetn ? 0 : spdt_service[3];
+    assign SPDT2 = resetn ? 0 : spdt_service[2];
+    assign SPDT3 = resetn ? 0 : spdt_service[1];
+    assign SPDT4 = resetn ? 0 : spdt_service[0];
 
     // assign push buttons
     wire push_u = push[0]; // is push up button pressed
@@ -79,23 +71,27 @@ module Main(
     wire push_m = push[4]; // is push middle button pressed
 
     // store current time and alarm time
-    reg [15:0] current_time; // current time
-    reg [15:0] alarm_time; // alarm time
+    wire [15:0] current_time; // current time
+    wire [15:0] alarm_time; // alarm time
 
-    reg [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
+    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
 
-    reg [3:0] which_seg_on; // one-hot style, tells which location segment is on
+    wire [3:0] which_seg_on; // one-hot style, tells which location segment is on
 
     // clock tick indicator led signal
     wire clk_led;
     assign clk_led = clk;
 
-    // wire that connect with 7-segment
+    // wires that connect with 7-segment
     wire [27:0] segValues;
     wire [27:0] finalSegValues;
 
-    // reg that stores the output number array for the 7-segment
-    reg [15:0] num;
+    // wire for the output number array for the 7-segment
+    wire [15:0] num;
+
+    // finish wires
+    wire finish1;
+    wire finish2;
 
     // instantiate modules
     Service_1_time_set service_1(
@@ -137,10 +133,14 @@ module Main(
     );
 
     // use the NumArrayTo7SegmentArray module to convert number to 7-segment
+    // TODO: fix using which_seg_on 
     NumArrayTo7SegmentArray numArrToSegArr (
         .numberArray(num),
         .segArray(segValues)
     )
+
+    // update current time
+
 
     // update 7 segment using d flip flop
      DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
