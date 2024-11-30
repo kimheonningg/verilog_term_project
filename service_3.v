@@ -19,15 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// Define state assignments
-`define SWIDTH 3 // State width
-`define S0 3'b000 // default
-`define S1 3'b001 // SPDT ON, waiting push_m
-`define S2 3'b010 // Stopwatch running
-`define S3 3'b100 // Stopwatch paused
-
-
-
 // String Pattern Recognizer module
 module Service_3_StopWatch(
     input clk,        // Main clock
