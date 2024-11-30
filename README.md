@@ -37,7 +37,7 @@
     input push_l,
     input push_r,
 
-    output [3:0] an, // active low. segment trigger. msb(left) to lsb(right)
+    output reg [3:0] sel, // which segment is selected. msb (left) to lsb (right)
     output reg finish1, // service1 done
     output reg [15:0] num // segment number. msb(left) to lsb(right)
 
@@ -51,7 +51,7 @@
     input push_l,
     input push_r,
 
-    output [3:0] an,
+    output reg [3:0] sel, // which segment is selected. msb (left) to lsb (right)
     output reg finish2,
     output reg [15:0] alarm // alarm time. not displayed, but passed to top module.
 
