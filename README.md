@@ -29,8 +29,17 @@
 
 ### 기능1 모듈: `service_1.v` 파일
 
-- inputs: clk, resetn, spdt1, push_u, push_d, push_l, push_r
-- outputs: [3:0] an, finish1, num[15:0]
+    input clk,
+    input resetn,
+    input spdt1,
+    input push_u,
+    input push_d,
+    input push_l,
+    input push_r,
+
+    output [3:0] an, // active low. segment trigger. msb(left) to lsb(right)
+    output reg finish1, // service1 done
+    output reg [15:0] num // segment number. msb(left) to lsb(right)
 
 ### 기능2 모듈: `service_2.v` 파일
 
