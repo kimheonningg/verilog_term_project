@@ -50,7 +50,7 @@ module Service_4_alarm_check(
     input clk,
     input resetn, // reset
     input SPDT4, // input string (1bit)
-    input [15:0] current, // currnet_time
+    input [15:0] current, // current_time
     input [15:0] alarm, // alarm_time
     input push_m,
     input mini_game,

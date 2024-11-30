@@ -27,7 +27,7 @@ module Service_1_time_set (
     input push_l,
     input push_r,
 
-    output [3:0] an,
+    output [3:0] an, // one-hot style, 1 if segment in that location is on
     output reg finish1,
     output reg [15:0] num // 15:12 11:8 7:4 3:0 = min min sec sec, each 4bit 0-9
 );
