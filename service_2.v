@@ -26,12 +26,10 @@ module Service_2_alarm_set (
     input push_d,
     input push_l,
     input push_r,
-    input [15:0] set_time,
 
     output [3:0] an,
     output reg finish2,
-    output reg [15:0] num, // 15:12 11:8 7:4 3:0 = min min sec sec, each 4bit 0-9
-    output reg [15:0] alarm
+    output reg [15:0] alarm // 15:12 11:8 7:4 3:0 = min min sec sec, each 4bit 0-9
 );
 
   reg [1:0] seg; // 3 2 1 0 left to right
@@ -67,21 +65,15 @@ module Service_2_alarm_set (
   // set time
   always @(posedge clk) begin
     if (!resetn) begin
-      num <= 0;
       alarm <= 0;
     end
     else begin
       if (spdt2) begin
         if (push_d) begin
-          num[4*seg+:4] = (num[4*seg+:4] == 0) ? 9 : num[4*seg+:4] - 1;
+          alarm[4*seg+:4] = (alarm[4*seg+:4] == 0) ? 9 : alarm[4*seg+:4] - 1;
         end else if (push_u) begin
-          num[4*seg+:4] = num[4*seg+:4] == 9 ? 0 : num[4*seg+:4] + 1;
+          alarm[4*seg+:4] = alarm[4*seg+:4] == 9 ? 0 : alarm[4*seg+:4] + 1;
         end
-      end
-
-      if (finish2) begin
-        alarm <= num;
-        num <= set_time;
       end
     end
   end
