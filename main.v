@@ -19,6 +19,13 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+// define constants
+`define SERVICERESET = 4'b0000; // reset
+`define SERVICE1 = 4'b1000; // spdt switch1 on - service 1
+`define SERVICE2 = 4'b0100; // spdt switch2 on - service 2
+`define SERVICE3 = 4'b0010; // spdt switch3 on - service 3
+`define SERVICE4 = 4'b0001; // spdt switch4 on - service 4
+
 // Main module
 module Main(
     input [4:0] push, // 5 push buttons
@@ -29,7 +36,7 @@ module Main(
     input clk, // clock
     
     output reg [27:0] seg, // 4 7-segment control
-    output [9:0] led, // 10 leds control
+    output [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
     );
 
@@ -37,6 +44,10 @@ module Main(
     wire [3:0] spdt_service = spdt[14:11]; // 4 spdt switches for changing modes
     wire [9:0] spdt_mini_game = spdt[10:1]; // 10 spdt switches for mini game
     wire resetn = spdt[0]; // 1 spdt switch for reset
+
+    // interpret leds
+    reg [3:0] spdt_led = led[13:10]; // 4 leds above spdt switches
+    reg [9:0] mini_game_led = led[9:0]; // 10 leds above mini game switches
 
     // assign service buttons 
     wire SPDT1, SPDT2, SPDT3, SPDT4;
@@ -52,6 +63,37 @@ module Main(
     wire push_r = push[3]; // is push right button pressed
     wire push_m = push[4]; // is push middle button pressed
 
+    // finish wires
+    wire finish1;
+    wire finish2;
+    wire finish3;
+    wire finish4;
+
+    // turn on spdt_leds
+    always @(spdt_service) begin
+        case(spdt_service)
+            SERVICERESET: spdt_led = 4'b0000;
+            SERVICE1: spdt_led = 4'b1000;
+            SERVICE2: spdt_led = 4'b0100;
+            SERVICE3: spdt_led = 4'b0010;
+            SERVICE4: spdt_led = 4'b0001;
+            default: spdt_led = 4'b0000;
+        endcase
+    end
+
+    // turn off spdt_leds when it is finished
+    always @(finish1, finish2, finish3, finish4) begin
+        if (finish1 == 1) 
+            spdt_led = 0;
+        else if (finish2 == 1) 
+            spdt_led = 0;
+        else if (finish3 == 1) 
+            spdt_led = 0; 
+        else if (finish4 == 1) 
+            spdt_led = 0;
+        else
+    end
+
     // store current time and alarm time
     reg [15:0] current_time; // current time
     wire [15:0] alarm_time; // alarm time
@@ -66,10 +108,7 @@ module Main(
 
     // wire for the output number array for the 7-segment
     wire [15:0] num;
-
-    // finish wires
-    wire finish1;
-    wire finish2;
+    // TODO: add initial state 0000, with resetn
 
     // instantiate modules
     Service_1_time_set service_1(
@@ -98,17 +137,25 @@ module Main(
         .num(num),
         .alarm(alarm_time)
     );
-    // Service_3_ service_3();
-    Service_4_alarm_check service_4(
-        .clk(clk), 
-        .resetn(resetn), 
-        .SPDT4(SPDT4), 
-        .current(current_time),
-        .alarm(alarm_time),
+    Service_3_ service_3(
+        .clk(clk),
+        .resetn(resetn),
+        .SPDT3(SPDT3),
         .push_m(push_m),
-        .mini_game(),
-        .alarm_state(alarm_state)
+        .segments(num),
+        .led(spdt_led[2]),
+        .finish3(finish3)
     );
+    // Service_4_alarm_check service_4(
+    //     .clk(clk), 
+    //     .resetn(resetn), 
+    //     .SPDT4(SPDT4), 
+    //     .current(current_time),
+    //     .alarm(alarm_time),
+    //     .push_m(push_m),
+    //     .mini_game(),
+    //     .alarm_state(alarm_state)
+    // );
 
     // update current_time
     always @(posedge clk) begin
