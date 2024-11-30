@@ -19,24 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// define constants
-`define SERVICERESET = 4'b0000; // reset
-`define SERVICE1 = 4'b1000; // spdt switch1 on - service 1
-`define SERVICE2 = 4'b0100; // spdt switch2 on - service 2
-`define SERVICE3 = 4'b0010; // spdt switch3 on - service 3
-`define SERVICE4 = 4'b0001; // spdt switch4 on - service 4
-
-// D flip flop
-module DFF(clk, in, out);
-    parameter n = 1;
-    input clk;
-    input [n-1:0] in;
-    output [n-1:0] out;
-    reg [n-1:0] out;
-    always @(posedge clk)
-        out = in;
-endmodule
-
 // Main module
 module Main(
     input [4:0] push, // 5 push buttons
@@ -46,7 +28,7 @@ module Main(
     // 1 spdt switch for reset
     input clk, // clock
     
-    output [27:0] seg, // 4 7-segment control
+    output reg [27:0] seg, // 4 7-segment control
     output [9:0] led, // 10 leds control
     output clk_led // clock led control
     );
@@ -82,9 +64,6 @@ module Main(
     wire clk_led;
     assign clk_led = clk;
 
-    // wires that connect with 7-segment
-    wire [27:0] segValues;
-
     // wire for the output number array for the 7-segment
     wire [15:0] num;
 
@@ -102,7 +81,7 @@ module Main(
         .push_l(push_l),
         .push_r(push_r),
         .an(which_seg_on),
-        .finish1(finish),
+        .finish1(finish1),
         .num(num)
     );
     Service_2_alarm_set service_2(
@@ -115,7 +94,7 @@ module Main(
         .push_r(push_r),
         .set_time(current_time),
         .an(which_seg_on),
-        .finish2(finish),
+        .finish2(finish2),
         .num(num),
         .alarm(alarm_time)
     );
@@ -154,8 +133,8 @@ module Main(
     // TODO: fix using which_seg_on 
     NumArrayTo7SegmentArray numArrToSegArr (
         .numberArray(num),
-        .segArray(segValues)
-    )
+        .segArray(seg)
+    );
 
 endmodule
 
