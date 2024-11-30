@@ -12,7 +12,7 @@ module tb;
   reg resetn;
   reg spdt1;
   reg u, d, l, r;
-  wire [3:0] an;
+  wire [3:0] sel;
   wire finish1;
   reg finish;
   wire [15:0] num;
@@ -105,7 +105,7 @@ module tb;
     .push_l(l),
     .push_r(r),
 
-    .an(an),
+    .sel(sel),
     .finish1(finish1),
     .num(num)
   );
