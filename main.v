@@ -71,7 +71,7 @@ module Main(
     wire push_m = push[4]; // is push middle button pressed
 
     // store current time and alarm time
-    wire [15:0] current_time; // current time
+    reg [15:0] current_time; // current time
     wire [15:0] alarm_time; // alarm time
 
     wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
@@ -132,6 +132,15 @@ module Main(
         .alarm_state(alarm_state)
     );
 
+    // update current_time
+    always @(posedge clk) begin
+        // if current_time is not undefined, update current_time
+        if (current_time !== 16'bx && current_time !== 16'bz) begin
+            current_time <= current_time + 1;
+            // TODO: add specific +1 functions
+        end
+    end
+
     // use the NumArrayTo7SegmentArray module to convert number to 7-segment
     // TODO: fix using which_seg_on 
     NumArrayTo7SegmentArray numArrToSegArr (
@@ -139,11 +148,8 @@ module Main(
         .segArray(segValues)
     )
 
-    // update current time
-
-
     // update 7 segment using d flip flop
-     DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
+    DFF #(28) segValuesDFF (.clk(clk), .in(segValues), .out(finalSegValues));
 endmodule
 
 module NumArrayTo7SegmentArray(
