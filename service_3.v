@@ -33,7 +33,6 @@ module Service_3_StopWatch(
     input SPDT3,      // SPDT switch 3
     input push_m,     // Push button
     output reg [15:0] segments, // Combined segments for seg1, seg2, seg3, seg4
-    output reg led,   // LED for SPDT3
     output reg finish3
 );
 
@@ -56,13 +55,11 @@ module Service_3_StopWatch(
             seconds <= 0;
             hundredths <= 0;
             running <= 0;
-            led <= 0;
         end else begin
             stopwatch_state <= next_state;  
             
             // Stopwatch functionality
             if (SPDT3) begin
-                led <= 1; // Turn on LED for SPDT3
                 case (stopwatch_state)
                     `S0: begin
                         // Idle: Reset stopwatch values
@@ -100,7 +97,6 @@ module Service_3_StopWatch(
                 endcase
             end else begin
                 // SPDT3 OFF: Reset LED and stop counters
-                led <= 0;
                 running <= 0;
             end
         end
@@ -140,5 +136,3 @@ module Service_3_StopWatch(
     end
 
 endmodule
-
-
