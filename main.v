@@ -148,7 +148,6 @@ module Main(
         .SPDT3(SPDT3),
         .push_m(push_m),
         .segments(num),
-        .led(spdt_led[2]),
         .finish3(finish3)
     );
     // Service_4_alarm_check service_4(
