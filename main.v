@@ -50,7 +50,9 @@ module Main(
 
     // make sClk
     wire sClk;
+    wire [1:0] iter; // wire for anode handling
     reg [17:0] counter = 18'd0;
+    assign iter = counter[17:16];
     always @(posedge clk_osc) begin
         counter <= counter + 1;
     end
@@ -186,58 +188,29 @@ module Main(
     wire currentNum;
 
     // update segments
-    always @(posedge clk or posedge clk_osc) begin
-        if(SPDT1) begin // service 1 running
-            anode <= which_seg_on;
-            case(which_seg_on)
-                4'1110: begin
-                    currentNum <= num[3:0]; 
-                end
-                4'b1101: begin
-                    currentNum <= num[7:4];
-                end
-                4'b1011: begin
-                    currentNum <= num[11:8];
-                end
-                4'b0111: begin
-                    currentNum <= num[15:12];
-                end
-            endcase
-        end
-        else if(SPDT2) begin // service 2 running
-            anode <= which_seg_on;
-            case(which_seg_on)
-                4'1110: begin
-                    currentNum <= num[3:0]; 
-                end
-                4'b1101: begin
-                    currentNum <= num[7:4];
-                end
-                4'b1011: begin
-                    currentNum <= num[11:8];
-                end
-                4'b0111: begin
-                    currentNum <= num[15:12];
-                end
-            endcase
-        end
-        else if(SPDT3) begin // service 3 running
-            anode <= which_seg_on;
-            case(which_seg_on)
-                4'1110: begin
-                    currentNum <= num[3:0]; 
-                end
-                4'b1101: begin
-                    currentNum <= num[7:4];
-                end
-                4'b1011: begin
-                    currentNum <= num[11:8];
-                end
-                4'b0111: begin
-                    currentNum <= num[15:12];
-                end
-            endcase
-        end
+    always @(posedge SCLK) begin
+        case (iter)
+            2'd0: begin // right-est segment
+                anode <= 4'b1110;
+                eSeg <= currentNum[3:0];
+            end
+            2'd1: begin
+                anode <= 4'b1101;
+                eSeg <= currentNum[7:4];
+            end
+            2'd2: begin
+                anode <= 4'b1011;
+                eSeg <= currentNum[11:8];
+            end
+            2'd3: begin // left-est segment
+                anode <= 4'b0111;
+                eSeg <= currentNum[15:12];
+            end
+            default: begin
+                anode <= 4'b1111;
+                eSeg <= 7'b0111111; // 0 for default
+            end
+        endcase
     end
     
     // use the NumTo7Segment module to convert number to 7-segment
@@ -268,6 +241,7 @@ module Main(
         end
     end
 endmodule
+
 module NumArrayTo7SegmentArray(
     input [15:0] numberArray,
     output reg [27:0] segArray
