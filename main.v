@@ -65,7 +65,7 @@ module Main(
         .reset(reset), 
         .clk(clk),
         .resetn(resetn)
-    )
+    );
 
     // interpret leds
     reg [3:0] spdt_led; // 4 leds above spdt switches
