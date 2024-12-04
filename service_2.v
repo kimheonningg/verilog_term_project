@@ -69,9 +69,9 @@ module Service_2_alarm_set (
     else begin
       if (spdt2) begin
         if (push_d) begin
-          alarm[4*seg+:4] = (alarm[4*seg+:4] == 0) ? 9 : alarm[4*seg+:4] - 1;
+          alarm[4*seg+:4] <= (alarm[4*seg+:4] == 0) ? 9 : alarm[4*seg+:4] - 1;
         end else if (push_u) begin
-          alarm[4*seg+:4] = alarm[4*seg+:4] == 9 ? 0 : alarm[4*seg+:4] + 1;
+          alarm[4*seg+:4] <= alarm[4*seg+:4] == 9 ? 0 : alarm[4*seg+:4] + 1;
         end
       end
     end
