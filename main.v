@@ -228,19 +228,17 @@ module Main(
        if (!resetn) begin
             current_time <= 16'd0;
        end
-       else if (current_time !== 16'bx && current_time !== 16'bz) begin
-            if (current_time == 16'd5959) begin
-                // Reset to 0000 when current_time is 5959 (59:59)
-                current_time <= 16'd0;
-            end else if (current_time[7:0] == 8'd59) begin
-                // If the lower 8 bits of current_time are 59, 
-                // current_time[15:8] + 1 and current_time[7:0] = 0
-                current_time[15:8] <= current_time[15:8] + 1;
-                current_time[7:0] <= 8'd0;
-            end else begin
-                // Otherwise, just do + 1
-                current_time <= current_time + 1;
-            end
+        if (current_time == 16'd5959) begin
+            // Reset to 0000 when current_time is 5959 (59:59)
+            current_time <= 16'd0;
+        end else if (current_time[7:0] == 8'd59) begin
+            // If the lower 8 bits of current_time are 59, 
+            // current_time[15:8] + 1 and current_time[7:0] = 0
+            current_time[15:8] <= current_time[15:8] + 1;
+            current_time[7:0] <= 8'd0;
+        end else begin
+            // Otherwise, just do + 1
+            current_time <= current_time + 1;
         end
     end
 endmodule
