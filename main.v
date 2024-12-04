@@ -220,11 +220,14 @@ module Main(
     );
 
     // update current_time
-    always @(posedge clk) begin
-        // if current_time is not undefined, update current_time
-       if (!resetn) begin
+    always @(negedge reset) begin
+         if (!resetn) begin
             current_time <= 16'd0;
        end
+    end
+
+    always @(posedge clk) begin
+        // if current_time is not undefined, update current_time
         if (current_time == 16'd5959) begin
             // Reset to 0000 when current_time is 5959 (59:59)
             current_time <= 16'd0;
