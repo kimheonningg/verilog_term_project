@@ -79,29 +79,29 @@ module Main_tb;
         push[4] = 0;
         #500; // Simulate stopwatch running
         push[4] = 1; // Push middle button to pause stopwatch
-        #50;
+        #5000;
         push[4] = 0;
         spdt[12] = 0; // Deactivate SPDT switch 3
-        #100;
+        #10000;
 
         // Test 5: Alarm On/Off (Service 4)
         spdt[11] = 1; // Activate SPDT switch 4
-        #100;
+        #10000;
         spdt[11] = 0; // Deactivate SPDT switch 4
-        #100;
+        #10000;
 
         // Test 6: Mini-game (Alarm Dismissal)
         spdt[11] = 1; // Activate SPDT switch 4
-        #100;
+        #10000;
         push[4] = 1; // Push middle button to start mini-game
-        #50;
+        #5000;
         push[4] = 0;
         spdt[10:1] = 10'b0000000001; // Activate correct SPDT switch for mini-game
-        #50;
+        #5000;
         spdt[10:1] = 10'b0000000000;
-        #500;
+        #50000;
         spdt[11] = 0; // Deactivate SPDT switch 4
-        #100;
+        #100000000000000000;
 
         // Finish simulation
         $finish;
