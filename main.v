@@ -48,6 +48,15 @@ module Main(
     wire resetn;
     reg clk;
 
+    // make sClk
+    wire sClk;
+    reg [17:0] counter = 18'd0;
+    always @(posedge clk_osc) begin
+        counter <= counter + 1;
+    end
+
+    sClk = counter[15];
+
     // connect with make_clk module
     make_clk make_clk_(
         .clk_osc(clk_osc),
@@ -174,71 +183,64 @@ module Main(
     //     .alarm_state(alarm_state)
     // );
 
-    // use the NumArrayTo7SegmentArray module to convert number to 7-segment
-
     wire currentNum;
 
     // update segments
     always @(posedge clk or posedge clk_osc) begin
         if(SPDT1) begin // service 1 running
-            if(clk) begin
-                anode <= which_seg_on;
-                case(which_seg_on)
-                    4'1110: begin
-                        currentNum <= num[3:0]; 
-                    end
-                    4'b1101: begin
-                        currentNum <= num[7:4];
-                    end
-                    4'b1011: begin
-                        currentNum <= num[11:8];
-                    end
-                    4'b0111: begin
-                        currentNum <= num[15:12];
-                    end
-                endcase
-            end
+            anode <= which_seg_on;
+            case(which_seg_on)
+                4'1110: begin
+                    currentNum <= num[3:0]; 
+                end
+                4'b1101: begin
+                    currentNum <= num[7:4];
+                end
+                4'b1011: begin
+                    currentNum <= num[11:8];
+                end
+                4'b0111: begin
+                    currentNum <= num[15:12];
+                end
+            endcase
         end
         else if(SPDT2) begin // service 2 running
-            if(clk) begin
-                anode <= which_seg_on;
-                case(which_seg_on)
-                    4'1110: begin
-                        currentNum <= num[3:0]; 
-                    end
-                    4'b1101: begin
-                        currentNum <= num[7:4];
-                    end
-                    4'b1011: begin
-                        currentNum <= num[11:8];
-                    end
-                    4'b0111: begin
-                        currentNum <= num[15:12];
-                    end
-                endcase
-            end
+            anode <= which_seg_on;
+            case(which_seg_on)
+                4'1110: begin
+                    currentNum <= num[3:0]; 
+                end
+                4'b1101: begin
+                    currentNum <= num[7:4];
+                end
+                4'b1011: begin
+                    currentNum <= num[11:8];
+                end
+                4'b0111: begin
+                    currentNum <= num[15:12];
+                end
+            endcase
         end
         else if(SPDT3) begin // service 3 running
-            if(clk_osc) begin
-                anode <= which_seg_on;
-                case(which_seg_on)
-                    4'1110: begin
-                        currentNum <= num[3:0]; 
-                    end
-                    4'b1101: begin
-                        currentNum <= num[7:4];
-                    end
-                    4'b1011: begin
-                        currentNum <= num[11:8];
-                    end
-                    4'b0111: begin
-                        currentNum <= num[15:12];
-                    end
-                endcase
-            end
+            anode <= which_seg_on;
+            case(which_seg_on)
+                4'1110: begin
+                    currentNum <= num[3:0]; 
+                end
+                4'b1101: begin
+                    currentNum <= num[7:4];
+                end
+                4'b1011: begin
+                    currentNum <= num[11:8];
+                end
+                4'b0111: begin
+                    currentNum <= num[15:12];
+                end
+            endcase
         end
     end
     
+    // use the NumTo7Segment module to convert number to 7-segment
     NumTo7Segment numTo7Seg (
         .numberArray(currentNum),
         .segArray(eSeg)
