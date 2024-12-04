@@ -133,7 +133,7 @@ module Main(
     assign clk_led = clk;
 
     // wire for the output number array for the 7-segment
-    wire [15:0] num1, num3;
+    wire [15:0] num1, num3, num4;
 
     // wire for each number of the number array
     wire [3:0] eachNum;
@@ -173,16 +173,19 @@ module Main(
         .segments(num3),
         .finish3(finish3)
     );
-    // Service_4_alarm_check service_4(
-    //     .clk(clk), 
-    //     .resetn(resetn), 
-    //     .SPDT4(SPDT4), 
-    //     .current(current_time),
-    //     .alarm(alarm_time),
-    //     .push_m(push_m),
-    //     .mini_game(),
-    //     .alarm_state(alarm_state)
-    // );
+    Service_4 service_4(
+        .clk(clk), 
+        .resetn(resetn), 
+        .SPDT4(SPDT4), 
+        .SPDTs(spdt_mini_game),
+        .push_m(push_m),
+        .current(current_time),
+        .alarm(alarm_time),
+        .alarm_state(alarm_state),
+        .count_state(num4),
+        .SPDT_LED(mini_game_led),
+        .finish4(finish4)
+    );
 
     reg [3:0] currentNum;
 
@@ -191,19 +194,19 @@ module Main(
         case (iter)
             2'd0: begin // right-est segment
                 anode <= 4'b1110;
-                currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : 0);
+                currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : (SPDT4 ? num4[3:0] : 0));
             end
             2'd1: begin
                 anode <= 4'b1101;
-                currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : 0);
+                currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : (SPDT4 ? num4[7:4] : 0));
             end
             2'd2: begin
                 anode <= 4'b1011;
-                currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : 0);
+                currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : (SPDT4 ? num4[11:8] : 0));
             end
             2'd3: begin // left-est segment
                 anode <= 4'b0111;
-                currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : 0);
+                currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : (SPDT4 ? num4[15:12] : 0));
             end
             default: begin
                 anode <= 4'b1111;
