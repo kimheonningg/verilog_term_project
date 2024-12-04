@@ -34,7 +34,7 @@ module Main(
     // 10 spdt switches for mini game +
     // 1 spdt switch for reset
     input mclk, // millisecond clock
-    input clk, // clock
+    input clk_osc, // clock
     
     output reg [7:0] seg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
@@ -45,7 +45,17 @@ module Main(
     // interpret spdt switches
     wire [3:0] spdt_service = spdt[14:11]; // 4 spdt switches for changing modes
     wire [9:0] spdt_mini_game = spdt[10:1]; // 10 spdt switches for mini game
-    wire resetn = spdt[0]; // 1 spdt switch for reset
+    wire reset = spdt[0]; // 1 spdt switch for reset
+    wire resetn;
+    reg clk;
+
+    // connect with make_clk module
+    make_clk make_clk_(
+        .clk_osc(clk_osc),
+        .reset(reset), 
+        .clk(clk),
+        .resetn(resetn)
+    )
 
     // interpret leds
     reg [3:0] spdt_led; // 4 leds above spdt switches
@@ -146,7 +156,7 @@ module Main(
         .finish2(finish2),
         .alarm(alarm_time)
     );
-    Service_3_ service_3(
+    Service_3_StopWatch service_3(
         .clk(mclk),
         .resetn(resetn),
         .SPDT3(SPDT3),
