@@ -71,10 +71,6 @@ module Main(
     reg [3:0] spdt_led; // 4 leds above spdt switches
     reg [9:0] mini_game_led; // 10 leds above mini game switches
     
-    assign led[13:10] = spdt_led; // 4 leds above spdt switches
-    assign led[9:0] = mini_game_led; // 10 leds above mini game switches
-
-
     // assign service buttons 
     wire SPDT1, SPDT2, SPDT3, SPDT4;
     assign SPDT1 = resetn ? 0 : spdt_service[3];
@@ -108,7 +104,7 @@ module Main(
     end
 
     // turn off spdt_leds when it is finished
-    always @(finish1, finish2, finish3, finish4) begin
+    always @(*) begin
         if (finish1 || finish2 || finish3 || finish4) begin
             spdt_led = 4'b0000; // Finish �긽�깭�뿉�꽌 �걫
         end else begin
@@ -121,6 +117,8 @@ module Main(
                 default: spdt_led = 4'b0000;
             endcase
         end
+        led[13:10] = spdt_led; // 4 leds above spdt switches
+        led[9:0] = mini_game_led; // 10 leds above mini game switches
     end
 
     // store current time and alarm time
