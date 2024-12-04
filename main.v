@@ -33,8 +33,7 @@ module Main(
     // 4 spdt switches for changing modes + 
     // 10 spdt switches for mini game +
     // 1 spdt switch for reset
-    input mclk, // millisecond clock
-    input clk_osc, // clock
+    input clk_osc, // millisecond clock
     
     output reg [7:0] seg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
@@ -157,7 +156,7 @@ module Main(
         .alarm(alarm_time)
     );
     Service_3_StopWatch service_3(
-        .clk(mclk),
+        .clk(clk_osc),
         .resetn(resetn),
         .SPDT3(SPDT3),
         .push_m(push_m),
@@ -176,9 +175,9 @@ module Main(
     // );
 
     // update segments
-    always @(posedge clk or posedge mclk) begin
+    always @(posedge clk or posedge clk_osc) begin
         if(spdt[2]) begin
-            if(mclk) begin
+            if(clk_osc) begin
             end
         end else begin
             if(clk) begin
