@@ -188,7 +188,7 @@ module Main(
     wire currentNum;
 
     // update segments
-    always @(posedge SCLK) begin
+    always @(posedge sClk) begin
         case (iter)
             2'd0: begin // right-est segment
                 anode <= 4'b1110;
