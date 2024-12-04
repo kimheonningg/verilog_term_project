@@ -13,7 +13,7 @@ module Main_tb;
     reg clk_osc;
 
     // Outputs
-    wire [7:0] eSeg;
+    wire [6:0] eSeg;
     wire [3:0] anode;
     wire [13:0] led;
     wire clk_led;
@@ -79,29 +79,29 @@ module Main_tb;
         push[4] = 0;
         #500; // Simulate stopwatch running
         push[4] = 1; // Push middle button to pause stopwatch
-        #5000;
+        #50;
         push[4] = 0;
         spdt[12] = 0; // Deactivate SPDT switch 3
-        #10000;
+        #100;
 
         // Test 5: Alarm On/Off (Service 4)
         spdt[11] = 1; // Activate SPDT switch 4
-        #10000;
+        #100;
         spdt[11] = 0; // Deactivate SPDT switch 4
-        #10000;
+        #100;
 
         // Test 6: Mini-game (Alarm Dismissal)
         spdt[11] = 1; // Activate SPDT switch 4
-        #10000;
+        #100;
         push[4] = 1; // Push middle button to start mini-game
-        #5000;
+        #50;
         push[4] = 0;
         spdt[10:1] = 10'b0000000001; // Activate correct SPDT switch for mini-game
-        #5000;
+        #50;
         spdt[10:1] = 10'b0000000000;
-        #50000;
+        #500;
         spdt[11] = 0; // Deactivate SPDT switch 4
-        #100000000000000000;
+        #100000000;
 
         // Finish simulation
         $finish;
