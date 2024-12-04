@@ -35,7 +35,7 @@ module Main(
     // 1 spdt switch for reset
     input clk_osc, 
     
-    output wire [7:0] eSeg, // 7-segment control
+    output wire [6:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
     output [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
@@ -220,7 +220,7 @@ module Main(
     );
 
     // update current_time
-    always @(posedge clk or negedge resetn) begin
+    always @(posedge clk) begin
         // if current_time is not undefined, update current_time
        if (!resetn) begin
             current_time <= 16'd0;
@@ -238,39 +238,6 @@ module Main(
             current_time <= current_time + 1;
         end
     end
-endmodule
-
-module NumArrayTo7SegmentArray(
-    input [15:0] numberArray,
-    output reg [27:0] segArray
-);
-
-    wire [3:0] number1, number2, number3, number4;
-
-    // number1 at the very left,
-    // and number4 at the very right
-    assign number1 = numberArray[15:12];
-    assign number2 = numberArray[11:8];
-    assign number3 = numberArray[7:4];
-    assign number4 = numberArray[3:0];
-
-    // the 7-segment encoding for each four numbers
-    wire [6:0] seg1, seg2, seg3, seg4;
-
-    // instantiate the NumTo7Segment module for each number
-    NumTo7Segment u1 (.number(number1), .seg(seg1));
-    NumTo7Segment u2 (.number(number2), .seg(seg2));
-    NumTo7Segment u3 (.number(number3), .seg(seg3));
-    NumTo7Segment u4 (.number(number4), .seg(seg4));
-
-    always @(*) begin
-        segArray[27:21] = seg1;
-        segArray[20:14] = seg2;
-        segArray[13:7]  = seg3;
-        segArray[6:0]   = seg4;
-    end
-    // seg1 is at the very left,
-    // and  seg4 is at the very right
 endmodule
 
 module NumTo7Segment(
