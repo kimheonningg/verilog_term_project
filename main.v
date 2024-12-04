@@ -212,7 +212,7 @@ module Main(
             end
         endcase
         if(which_seg_on == anode) {
-            anode <= !(which_seg_on & clk);
+            anode <= (!(which_seg_on) & clk);
         }
     end
     
