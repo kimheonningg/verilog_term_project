@@ -46,9 +46,10 @@ module Main(
     wire resetn = spdt[0]; // 1 spdt switch for reset
 
     // interpret leds
-    reg [3:0] spdt_led;
-    assign led[13:10] = spdt_led; // 4 leds above spdt switches
+    reg [3:0] spdt_led; // 4 leds above spdt switches
+    assign led[13:10] = spdt_led;
     reg [9:0] mini_game_led = led[9:0]; // 10 leds above mini game switches
+    assign led[9:0] = mini_game_led;
 
     // assign service buttons 
     wire SPDT1, SPDT2, SPDT3, SPDT4;
@@ -84,15 +85,18 @@ module Main(
 
     // turn off spdt_leds when it is finished
     always @(finish1, finish2, finish3, finish4) begin
-        if (finish1 == 1) 
-            spdt_led = 0;
-        else if (finish2 == 1) 
-            spdt_led = 0;
-        else if (finish3 == 1) 
-            spdt_led = 0; 
-        else if (finish4 == 1) 
-            spdt_led = 0;
-        else ;
+        if (finish1 || finish2 || finish3 || finish4) begin
+            spdt_led = 4'b0000; // Finish 상태에서 끔
+        end else begin
+            case(spdt_service)
+                `SERVICERESET: spdt_led = 4'b0000;
+                `SERVICE1: spdt_led = 4'b1000;
+                `SERVICE2: spdt_led = 4'b0100;
+                `SERVICE3: spdt_led = 4'b0010;
+                `SERVICE4: spdt_led = 4'b0001;
+                default: spdt_led = 4'b0000;
+            endcase
+        end
     end
 
     // store current time and alarm time
