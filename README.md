@@ -17,9 +17,10 @@
       input [4:0] push, // 5 push buttons
       input [14:0] spdt,
       // 4 spdt switches for changing modes + 10 spdt switches for mini game + 1 spdt switch for reset
-      input clk, // clock
+      input clk_osc,
       
-      output [27:0] seg, // 4 7-segment control
+      output reg [7:0] seg, // 7-segment control
+      output reg [3:0] anode, // 7-segment control
       output [13:0] led, // 4 spdt leds + 10 mini game leds control
       output clk_led // clock led control
 
