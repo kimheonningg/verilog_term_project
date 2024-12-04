@@ -37,7 +37,7 @@ module Main(
     
     output wire [6:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
-    output [13:0] led, // 4 spdt leds + 10 mini game leds control
+    output reg [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
     );
 
@@ -71,10 +71,8 @@ module Main(
     reg [3:0] spdt_led; // 4 leds above spdt switches
     reg [9:0] mini_game_led; // 10 leds above mini game switches
     
-    always @(*) begin
-        led[13:10] = spdt_led; // 4 leds above spdt switches
-        led[9:0] = mini_game_led; // 10 leds above mini game switches
-    end
+    assign led[13:10] = spdt_led; // 4 leds above spdt switches
+    assign led[9:0] = mini_game_led; // 10 leds above mini game switches
 
 
     // assign service buttons 
