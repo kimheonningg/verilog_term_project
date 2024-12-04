@@ -57,7 +57,7 @@ module Main(
         counter <= counter + 1;
     end
 
-    sClk = counter[15];
+    assign sClk = counter[15];
 
     // connect with make_clk module
     make_clk make_clk_(
@@ -70,7 +70,7 @@ module Main(
     // interpret leds
     reg [3:0] spdt_led; // 4 leds above spdt switches
     assign led[13:10] = spdt_led;
-    reg [9:0] mini_game_led ; // 10 leds above mini game switches
+    reg [9:0] mini_game_led; // 10 leds above mini game switches
     assign led[9:0] = mini_game_led;
 
     // assign service buttons 
@@ -108,7 +108,7 @@ module Main(
     // turn off spdt_leds when it is finished
     always @(finish1, finish2, finish3, finish4) begin
         if (finish1 || finish2 || finish3 || finish4) begin
-            spdt_led = 4'b0000; // Finish 상태에서 끔
+            spdt_led = 4'b0000; // Finish �긽�깭�뿉�꽌 �걫
         end else begin
             case(spdt_service)
                 `SERVICERESET: spdt_led = 4'b0000;
@@ -130,7 +130,6 @@ module Main(
     wire [3:0] which_seg_on; // one-hot style, tells which location segment is on
 
     // clock tick indicator led signal
-    wire clk_led;
     assign clk_led = clk;
 
     // wire for the output number array for the 7-segment
@@ -185,7 +184,7 @@ module Main(
     //     .alarm_state(alarm_state)
     // );
 
-    wire currentNum;
+    wire [15:0] currentNum;
 
     // update segments
     always @(posedge sClk) begin
@@ -211,9 +210,7 @@ module Main(
                 eSeg <= 7'b0111111; // 0 for default
             end
         endcase
-        if(which_seg_on == anode) {
-            anode <= (!(which_seg_on) & clk);
-        }
+        if(which_seg_on == anode) anode <= (!(which_seg_on) & clk);
     end
     
     // use the NumTo7Segment module to convert number to 7-segment
