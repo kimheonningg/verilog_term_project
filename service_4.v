@@ -35,6 +35,53 @@
 `define RWIDTH 10
 `define RN0
 
+module Service_4(
+    input clk,
+    input resetn,
+    input SPDT4, // Buttons
+    input [9:0] SPDTs,
+    input push_m,
+    
+    input [15:0] current, // current_time
+    input [15:0] alarm, // alarm_time
+    
+    output [2:0] alarm_state, // state 1. alarm on, state 2. minigame, state 3. alarm off.
+    output [15:0] count_state,
+    output [9:0] SPDT_LED,
+    output finish4
+);
+    
+    Service_4_alarm_check uut_alarm_check (
+        .clk(clk),
+        .resetn(resetn),
+        .SPDT4(SPDT4),
+        .current(current),
+        .alarm(alarm),
+        .push_m(push_m),
+        .mini_game(finish4),
+        .alarm_state(alarm_state)//output
+    );
+
+    // Service_4_minigame
+    Service_4_minigame uut_minigame (
+        .clk(clk),
+        .resetn(resetn),
+        .alarm_state(alarm_state),
+        .random_led(SPDT_LED),//input
+        .SPDTs(SPDTs),//input
+        .count_state(count_state),//output
+        .mini_game(finish4)//done
+    );
+    
+    Service_4_random uut_random (
+        .clk(clk),
+        .resetn(resetn),
+        .hot(SPDT_LED)
+    );
+    
+endmodule
+    
+
 module Service_4_alarm_check(
     input clk,
     input resetn, // reset
@@ -43,8 +90,9 @@ module Service_4_alarm_check(
     input [15:0] alarm, // alarm_time
     input push_m,
     input mini_game,
-   
+
     output reg [2:0] alarm_state // state 1. alarm on, state 2. minigame, state 3. alarm off.
+    
     );
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
 
@@ -78,14 +126,14 @@ module Service_4_minigame(
     output reg [15:0] count_state,
     output reg mini_game
 );
-    // 추가된 변수 선언
+    // ????? ???? ????
     wire cmp_game;
 
-    // random_led와 SPDTs 비교
+    // random_led?? SPDTs ??
     assign cmp_game = (random_led == SPDTs);
    
     // Combinational logic for next_count and next_mini_game
-    always @(*) begin
+    always @(posedge clk or negedge resetn) begin
         if (!resetn) begin
             count_state = `C0;
             mini_game = 1'b0;
@@ -95,31 +143,31 @@ module Service_4_minigame(
                `S3: begin
                    case (count_state)
                        `C0: begin
-                           count_state = cmp_game ? `C1 : `C0;
-                           mini_game = 1'b0;
+                           count_state <= cmp_game ? `C1 : `C0;
+                           mini_game <= 1'b0;
                        end
                        `C1: begin
-                           count_state = cmp_game ? `C2 : `C0;
-                           mini_game = 1'b0;
+                           count_state <= cmp_game ? `C2 : `C0;
+                           mini_game <= 1'b0;
                        end
                        `C2: begin
-                           count_state = cmp_game ? `C3 : `C0;
-                           mini_game = cmp_game ? 1'b1 : 1'b0;
+                           count_state <= cmp_game ? `C3 : `C0;
+                           mini_game <= 1'b0;
                        end
                        `C3: begin
-                           count_state = `C0;
-                           mini_game = 1'b0;
+                           count_state <= `C0;
+                           mini_game <= 1'b1;
                        end
                        
                        default: begin
-                           count_state = `C0;
-                           mini_game = 1'b0;
+                           count_state <= `C0;
+                           mini_game <= 1'b0;
                        end
                     endcase
                end
            default: begin
-                count_state = `C0;
-                mini_game = 1'b0;
+                count_state <= `C0;
+                mini_game <= 1'b0;
                 end
            endcase
         end
@@ -136,17 +184,17 @@ module Service_4_random
 
     wire feedback_value;
     wire [3:0] q;    
-    reg [3:0] r_reg = 4'b1011; // LFSR initial value
+    reg [7:0] r_reg = 8'b1011_1001; // LFSR initial value
 
     always @(posedge clk) begin
         if (!resetn)
-            r_reg <= 4'b1011; // Use non-blocking assignment
+            r_reg <= 8'b1011_1001; // Use non-blocking assignment
         else
-            r_reg <= {r_reg[2:0], feedback_value}; // Shift & feedback
+            r_reg <= {r_reg[6:0], feedback_value}; // Shift & feedback
     end
 
-    assign feedback_value = r_reg[3] ^ r_reg[2]; // Feedback value
-    assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
+    assign feedback_value = r_reg[7] ^ r_reg[5]; // Feedback value
+    assign q = r_reg%10;//(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
 
     always @(*) begin
         hot = 10'b0000000001 << q;
