@@ -33,9 +33,9 @@ module Main(
     // 4 spdt switches for changing modes + 
     // 10 spdt switches for mini game +
     // 1 spdt switch for reset
-    input clk_osc, // millisecond clock
+    input clk_osc, 
     
-    output reg [7:0] seg, // 7-segment control
+    output reg [7:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
     output [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
@@ -174,31 +174,75 @@ module Main(
     //     .alarm_state(alarm_state)
     // );
 
+    // use the NumArrayTo7SegmentArray module to convert number to 7-segment
+
+    wire currentNum;
+
     // update segments
     always @(posedge clk or posedge clk_osc) begin
-        if(spdt[2]) begin
-            if(clk_osc) begin
-            end
-        end else begin
+        if(SPDT1) begin // service 1 running
             if(clk) begin
-                if(SPDT1) begin // service 1 running
-                   
-                end else if(SPDT2) begin // service 2 running
-                    case(which_seg_on)
-                        4'b0001: begin
-                            
-                        end
-                        4'b0010: begin
-                        end
-                        4'b0100: begin
-                        end
-                        4'b1000: begin
-                        end
-                    endcase
-                end
+                anode <= which_seg_on;
+                case(which_seg_on)
+                    4'1110: begin
+                        currentNum <= num[3:0]; 
+                    end
+                    4'b1101: begin
+                        currentNum <= num[7:4];
+                    end
+                    4'b1011: begin
+                        currentNum <= num[11:8];
+                    end
+                    4'b0111: begin
+                        currentNum <= num[15:12];
+                    end
+                endcase
+            end
+        end
+        else if(SPDT2) begin // service 2 running
+            if(clk) begin
+                anode <= which_seg_on;
+                case(which_seg_on)
+                    4'1110: begin
+                        currentNum <= num[3:0]; 
+                    end
+                    4'b1101: begin
+                        currentNum <= num[7:4];
+                    end
+                    4'b1011: begin
+                        currentNum <= num[11:8];
+                    end
+                    4'b0111: begin
+                        currentNum <= num[15:12];
+                    end
+                endcase
+            end
+        end
+        else if(SPDT3) begin // service 3 running
+            if(clk_osc) begin
+                anode <= which_seg_on;
+                case(which_seg_on)
+                    4'1110: begin
+                        currentNum <= num[3:0]; 
+                    end
+                    4'b1101: begin
+                        currentNum <= num[7:4];
+                    end
+                    4'b1011: begin
+                        currentNum <= num[11:8];
+                    end
+                    4'b0111: begin
+                        currentNum <= num[15:12];
+                    end
+                endcase
             end
         end
     end
+    
+    NumTo7Segment numTo7Seg (
+        .numberArray(currentNum),
+        .segArray(eSeg)
+    );
 
     // update current_time
     always @(posedge clk or negedge resetn) begin
@@ -221,13 +265,6 @@ module Main(
             end
         end
     end
-
-    // use the NumArrayTo7SegmentArray module to convert number to 7-segment
-    // TODO: fix using which_seg_on 
-     NumArrayTo7SegmentArray numArrToSegArr (
-        .numberArray(num),
-        .segArray(seg)
-    );
 endmodule
 module NumArrayTo7SegmentArray(
     input [15:0] numberArray,
