@@ -122,10 +122,7 @@ module Main(
 
     // wire for the output number array for the 7-segment
     wire [15:0] num1, num3, num4;
-
-    // wire for each number of the number array
-    wire [3:0] eachNum;
-
+    
     // TODO: add initial state 0000, with resetn
 
     // instantiate modules
