@@ -35,17 +35,42 @@
 `define RWIDTH 10
 `define RN0 
 
-module DFF(clk, in, out);
-    parameter n = 1; //width
-    input clk;
-    input [n-1:0] in;
-    output [n-1:0] out;
-    reg [n-1:0] out;
-    always @(posedge clk)
-        out = in;
+module Service_4(
+	input clk,
+	input resetn,
+	input SPDT4,
+	input [15:0] current,
+	input push_m,
+	input mini_game,
+	input [9:0] SPDTs,
+
+	output [2:0] alarm_state
+	output [15:0] count_state,
+	output reg mini_game,
+	output [9:0] hot
+);
+
+	Service_4_alarm_check(
+		.clk(clk),
+		.resetn(resetn),
+		.SPDT4(SPDT4),
+		.current(current),
+		.alarm(alarm),
+		.push_m(push_m).
+		.mini_game(mini_game),
+		.alarm_state(alarm_state)
+	);
+	Service_4_minigame(
+		.clk(clk),
+		.resetn(resetn),
+		.alarm_state(alarm_state),
+		.random_led(random_led),
+		.SPDTs(SPDTs),
+
+		.count
+		
 endmodule
 
-// String Pattern Recognizer module
 module Service_4_alarm_check(
     input clk,
     input resetn, // reset
@@ -55,38 +80,27 @@ module Service_4_alarm_check(
     input push_m,
     input mini_game,
     
-    output [2:0] alarm_state // state 1. alarm on, state 2. minigame, state 3. alarm off.
+    output reg [2:0] alarm_state // state 1. alarm on, state 2. minigame, state 3. alarm off.
     );
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
-    wire comparation;
-    wire [2:0] next;
-    reg [2:0] next_state;
-    
-    assign comparation = (current == alarm);
-        
-    // state register
-    DFF #(`SWIDTH) state_reg(clk, next, alarm_state);
-    
-    // next state and output equations
-    always @(*) begin // when time = alarm.
-        if (SPDT4) begin
-            case(alarm_state)
-                `S0: next_state = `S1;
-                `S1: next_state = (comparation ? `S2 : `S1);
-                `S2: next_state = (push_m ? `S3 : `S2);
-                `S3: next_state = (mini_game ? `S1 : `S3);
-                default: next_state = `S1;
-            endcase
-        end
-        else
-            next_state = `S0;
-    end
-    
-    // add reset
-    assign next = resetn ? `S0 : next_state;
-    
-endmodule
 
+    always @(posedge clk) begin 
+		if (!resetn) 
+		    alarm_state <= `S0;    
+	    else begin
+			if (SPDT4) begin// when time = alarm.
+		            case(alarm_state)
+		                `S0: alarm_state <= `S1;
+		                `S1: alarm_state <= ((current == alarm) ? `S2 : `S1);
+		                `S2: alarm_state <= (push_m ? `S3 : `S2);
+		                `S3: alarm_state <= (mini_game ? `S1 : `S3);
+		                default: alarm_state <= `S1;
+		            endcase
+		        end
+	        else
+	            alarm_state = `S0;
+    end
+endmodule
 
 module Service_4_minigame(
     input clk,
@@ -95,78 +109,80 @@ module Service_4_minigame(
     input [9:0] random_led,
     input [9:0] SPDTs,
 
-    output [15:0] count_state,
+    output reg [15:0] count_state,
     output reg mini_game
 );
-    // Ãß°¡µÈ º¯¼ö ¼±¾ğ
-
+    // ì¶”ê°€ëœ ë³€ìˆ˜ ì„ ì–¸
     wire cmp_game;
-    wire [15:0] next;
-    reg [15:0] next_count;
 
-    // random_led¿Í SPDTs ºñ±³
+    // random_ledì™€ SPDTs ë¹„êµ
     assign cmp_game = (random_led == SPDTs);
-    DFF #(`CWIDTH) state_reg(clk, next, count_state);
     
     // Combinational logic for next_count and next_mini_game
     always @(*) begin
-        case (alarm_state)
-            `S3: begin
-                case (count_state)
-                    `C0: begin
-                        next_count = cmp_game ? `C1 : `C0;
-                        mini_game = 1'b0;
-                    end
-                    `C1: begin
-                        next_count = cmp_game ? `C2 : `C0;
-                        mini_game = 1'b0;
-                    end
-                    `C2: begin
-                        next_count = cmp_game ? `C3 : `C0;
-                        mini_game = 1'b0;
-                    end
-                    `C3: begin
-                        next_count = `C0;
-                        mini_game = 1'b1;
-                    end
-                    default: begin
-                        next_count = `C0;
-                        mini_game = 1'b0;
-                    end
-                endcase
-            end
-            default: begin
-                next_count = `C0;
-                mini_game = 1'b0;
-            end
-       endcase
+		if (!resetn) begin
+			count_state = `C0;
+			mini_game = 1'b0;
+		else begin
+	        case (alarm_state)
+	            `S3: begin
+	                case (count_state)
+	                    `C0: begin
+	                        count_state = cmp_game ? `C1 : `C0;
+	                        mini_game = 1'b0;
+	                    end
+	                    `C1: begin
+	                        count_state = cmp_game ? `C2 : `C0;
+	                        mini_game = 1'b0;
+	                    end
+	                    `C2: begin
+	                        count_state <= cmp_game ? `C3 : `C0;
+	                        mini_game <= 1'b0;
+	                    end
+	                    `C3: begin
+	                        count_state <= `C0;
+	                        mini_game <= 1'b1;
+	                    end
+	                    default: begin
+	                        count_state <= `C0;
+	                        mini_game <= 1'b0;
+	                    end
+	                endcase
+	            end
+	            default: begin
+	                count_state = `C0;
+	                mini_game = 1'b0;
+	            end
+	       endcase
+		end
     end
-    
-    assign next = resetn ? `C0 : next_count;
 
 endmodule
 
 
 module Service_4_random
 (
-	input clk, // clock
-	output [3:0] q, // output
-	output [9:0] hot
+	input clk,
+	input resetn,
+	output [9:0] hot //output
 );
+    reg  [3:0]	r_reg = 4'b1011; // LFSRì˜ ì´ˆê¸°ê°’
+    wire feedback_value;
+	wire q;
     
-    reg  [3:0]	r_reg = 4'b1011; // LFSRÀÇ ÃÊ±â°ª
-    wire 		feedback_value; 
-    
-    always @(posedge clk) begin
-        r_reg <= {r_reg[3:0], feedback_value}; // shift & feedback
-        r_reg = r_reg+1;
+	always @(posedge clk) begin
+		if (!resetn)
+			r_reg = 4'b1011;
+		else	
+			r_reg <= {r_reg[2:0], feedback_value}; // shift & feedback
     end
     
-    assign feedback_value = r_reg[3] ^ r_reg[2]; // feedback value¸¦ assign
-    assign q = (r_reg >= 4'b1001 ? r_reg-4'b1001: r_reg); // 4°³ÀÇ Register °ªÀ» Ãâ·ÂÀ¸·Î ³»º¸³½´Ù.
-    assign hot = 10'b0000000001 << q;
-    
+    assign feedback_value = r_reg[3] ^ r_reg[2]; // feedback valueë¥¼ assign
+    assign q = (r_reg >= 4'b1001 ? r_reg-4'b1001: r_reg); // 4ê°œì˜ Register ê°’ì„ ì¶œë ¥ìœ¼ë¡œ ë‚´ë³´ë‚¸ë‹¤.
 
+	always @(*) begin
+		hot = 10'b0000000001 << q;
+	end
 endmodule
 
 
