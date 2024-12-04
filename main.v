@@ -211,6 +211,9 @@ module Main(
                 eSeg <= 7'b0111111; // 0 for default
             end
         endcase
+        if(which_seg_on == anode) {
+            anode <= !(which_seg_on & clk);
+        }
     end
     
     // use the NumTo7Segment module to convert number to 7-segment
