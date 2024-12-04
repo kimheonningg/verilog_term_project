@@ -35,7 +35,7 @@ module Main(
     // 1 spdt switch for reset
     input clk_osc, 
     
-    output reg [7:0] eSeg, // 7-segment control
+    output wire [7:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
     output [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
@@ -46,7 +46,7 @@ module Main(
     wire [9:0] spdt_mini_game = spdt[10:1]; // 10 spdt switches for mini game
     wire reset = spdt[0]; // 1 spdt switch for reset
     wire resetn;
-    reg clk;
+    wire clk;
 
     // make sClk
     wire sClk;
@@ -184,26 +184,26 @@ module Main(
     //     .alarm_state(alarm_state)
     // );
 
-    wire [15:0] currentNum;
+    wire [3:0] currentNum;
 
     // update segments
     always @(posedge sClk) begin
         case (iter)
             2'd0: begin // right-est segment
                 anode <= 4'b1110;
-                eSeg <= currentNum[3:0];
+                currentNum <= num[3:0];
             end
             2'd1: begin
                 anode <= 4'b1101;
-                eSeg <= currentNum[7:4];
+                currentNum <= num[7:4];
             end
             2'd2: begin
                 anode <= 4'b1011;
-                eSeg <= currentNum[11:8];
+                currentNum <= num[11:8];
             end
             2'd3: begin // left-est segment
                 anode <= 4'b0111;
-                eSeg <= currentNum[15:12];
+                currentNum <= num[15:12];
             end
             default: begin
                 anode <= 4'b1111;
@@ -215,8 +215,8 @@ module Main(
     
     // use the NumTo7Segment module to convert number to 7-segment
     NumTo7Segment numTo7Seg (
-        .numberArray(currentNum),
-        .segArray(eSeg)
+        .number(currentNum),
+        .seg(eSeg)
     );
 
     // update current_time
