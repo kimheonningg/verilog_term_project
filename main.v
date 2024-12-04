@@ -91,18 +91,6 @@ module Main(
     wire finish3;
     wire finish4;
 
-    // turn on spdt_leds
-    always @(spdt_service) begin
-        case(spdt_service)
-            `SERVICERESET: spdt_led = 4'b0000;
-            `SERVICE1: spdt_led = 4'b1000;
-            `SERVICE2: spdt_led = 4'b0100;
-            `SERVICE3: spdt_led = 4'b0010;
-            `SERVICE4: spdt_led = 4'b0001;
-            default: spdt_led = 4'b0000;
-        endcase
-    end
-
     // turn off spdt_leds when it is finished
     always @(*) begin
         if (finish1 || finish2 || finish3 || finish4) begin
