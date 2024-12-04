@@ -184,7 +184,7 @@ module Main(
     //     .alarm_state(alarm_state)
     // );
 
-    wire [3:0] currentNum;
+    reg [3:0] currentNum;
 
     // update segments
     always @(posedge sClk) begin
@@ -207,7 +207,7 @@ module Main(
             end
             default: begin
                 anode <= 4'b1111;
-                eSeg <= 7'b0111111; // 0 for default
+                currentNum <= 4'b0000; // 0 for default
             end
         endcase
         if(which_seg_on == anode) anode <= (!(which_seg_on) & clk);
