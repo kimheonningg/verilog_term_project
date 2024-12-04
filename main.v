@@ -69,7 +69,7 @@ module Main(
 
     // interpret leds
     reg [3:0] spdt_led = 0; // 4 leds above spdt switches
-    reg [9:0] mini_game_led = 0; // 10 leds above mini game switches
+    wire [9:0] mini_game_led = 0; // 10 leds above mini game switches
     
     // assign service buttons 
     wire SPDT1, SPDT2, SPDT3, SPDT4;
