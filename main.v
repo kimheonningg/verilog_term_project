@@ -131,13 +131,13 @@ module Main(
 
     wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
 
-    wire [3:0] which_seg_on; // one-hot style, tells which location segment is on
+    wire [3:0] which_seg_on1, which_seg_on2; // one-hot style, tells which location segment is on
 
     // clock tick indicator led signal
     assign clk_led = clk;
 
     // wire for the output number array for the 7-segment
-    wire [15:0] num;
+    wire [15:0] num1, num3;
 
     // wire for each number of the number array
     wire [3:0] eachNum;
@@ -153,9 +153,9 @@ module Main(
         .push_d(push_d),
         .push_l(push_l),
         .push_r(push_r),
-        .sel(which_seg_on),
+        .sel(which_seg_on1),
         .finish1(finish1),
-        .num(num)
+        .num(num1)
     );
     Service_2_alarm_set service_2(
         .clk(clk),
@@ -165,7 +165,7 @@ module Main(
         .push_d(push_d),
         .push_l(push_l),
         .push_r(push_r),
-        .sel(which_seg_on),
+        .sel(which_seg_on2),
         .finish2(finish2),
         .alarm(alarm_time)
     );
@@ -174,7 +174,7 @@ module Main(
         .resetn(resetn),
         .SPDT3(SPDT3),
         .push_m(push_m),
-        .segments(num),
+        .segments(num3),
         .finish3(finish3)
     );
     // Service_4_alarm_check service_4(
@@ -195,26 +195,27 @@ module Main(
         case (iter)
             2'd0: begin // right-est segment
                 anode <= 4'b1110;
-                currentNum <= num[3:0];
+                currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : 0);
             end
             2'd1: begin
                 anode <= 4'b1101;
-                currentNum <= num[7:4];
+                currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : 0);
             end
             2'd2: begin
                 anode <= 4'b1011;
-                currentNum <= num[11:8];
+                currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : 0);
             end
             2'd3: begin // left-est segment
                 anode <= 4'b0111;
-                currentNum <= num[15:12];
+                currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : 0);
             end
             default: begin
                 anode <= 4'b1111;
                 currentNum <= 4'b0000; // 0 for default
             end
         endcase
-        if(which_seg_on == anode) anode <= (!(which_seg_on) & clk);
+        if(which_seg_on1 == anode) anode <= (!(which_seg_on1) & clk);
+        if(which_seg_on2 == anode) anode <= (!(which_seg_on2) & clk);
     end
     
     // use the NumTo7Segment module to convert number to 7-segment
