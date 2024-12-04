@@ -82,6 +82,11 @@
     input [15:0] alarm, // alarm_time  <br/>
 
     output [2:0] alarm_state,
+    //S0 3'b000 => alarm_mode_off. nothing to do
+    //S0 3'b001 => alarm_mode_on. stanby. nothing to do
+    //S0 3'b010 => alarm_on. Flash all Segments and LEDs
+    //S0 3'b100 => minigame. Display count_state and SPDT_LED.
+
     output [15:0] count_state, //Seg LEDs
-    output [9:0] SPDT_LED,
+    output [9:0] SPDT_LED, // above SPDTs
     output finish4
