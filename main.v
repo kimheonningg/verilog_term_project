@@ -107,7 +107,7 @@ module Main(
 
     wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
 
-    wire [3:0] which_seg_on  = anode; // one-hot style, tells which location segment is on
+    wire [3:0] which_seg_on; // one-hot style, tells which location segment is on
 
     // clock tick indicator led signal
     wire clk_led;
@@ -215,10 +215,42 @@ module Main(
 
     // use the NumArrayTo7SegmentArray module to convert number to 7-segment
     // TODO: fix using which_seg_on 
-    NumTo7Segment numTo7Seg (
-        .number(eachNum),
-        .seg(seg)
-    )
+     NumArrayTo7SegmentArray numArrToSegArr (
+        .numberArray(num),
+        .segArray(seg)
+    );
+endmodule
+module NumArrayTo7SegmentArray(
+    input [15:0] numberArray,
+    output reg [27:0] segArray
+);
+
+    wire [3:0] number1, number2, number3, number4;
+
+    // number1 at the very left,
+    // and number4 at the very right
+    assign number1 = numberArray[15:12];
+    assign number2 = numberArray[11:8];
+    assign number3 = numberArray[7:4];
+    assign number4 = numberArray[3:0];
+
+    // the 7-segment encoding for each four numbers
+    wire [6:0] seg1, seg2, seg3, seg4;
+
+    // instantiate the NumTo7Segment module for each number
+    NumTo7Segment u1 (.number(number1), .seg(seg1));
+    NumTo7Segment u2 (.number(number2), .seg(seg2));
+    NumTo7Segment u3 (.number(number3), .seg(seg3));
+    NumTo7Segment u4 (.number(number4), .seg(seg4));
+
+    always @(*) begin
+        segArray[27:21] = seg1;
+        segArray[20:14] = seg2;
+        segArray[13:7]  = seg3;
+        segArray[6:0]   = seg4;
+    end
+    // seg1 is at the very left,
+    // and  seg4 is at the very right
 endmodule
 
 module NumTo7Segment(
