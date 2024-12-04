@@ -20,11 +20,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 // define constants
-`define SERVICERESET = 4'b0000; // reset
-`define SERVICE1 = 4'b1000; // spdt switch1 on - service 1
-`define SERVICE2 = 4'b0100; // spdt switch2 on - service 2
-`define SERVICE3 = 4'b0010; // spdt switch3 on - service 3
-`define SERVICE4 = 4'b0001; // spdt switch4 on - service 4
+`define SERVICERESET 4'b0000 // reset
+`define SERVICE1 4'b1000 // spdt switch1 on - service 1
+`define SERVICE2 4'b0100 // spdt switch2 on - service 2
+`define SERVICE3 4'b0010 // spdt switch3 on - service 3
+`define SERVICE4 4'b0001 // spdt switch4 on - service 4
 
 // Main module
 module Main(
@@ -46,7 +46,8 @@ module Main(
     wire resetn = spdt[0]; // 1 spdt switch for reset
 
     // interpret leds
-    reg [3:0] spdt_led = led[13:10]; // 4 leds above spdt switches
+    reg [3:0] spdt_led;
+    assign led[13:10] = spdt_led; // 4 leds above spdt switches
     reg [9:0] mini_game_led = led[9:0]; // 10 leds above mini game switches
 
     // assign service buttons 
@@ -72,11 +73,11 @@ module Main(
     // turn on spdt_leds
     always @(spdt_service) begin
         case(spdt_service)
-            SERVICERESET: spdt_led = 4'b0000;
-            SERVICE1: spdt_led = 4'b1000;
-            SERVICE2: spdt_led = 4'b0100;
-            SERVICE3: spdt_led = 4'b0010;
-            SERVICE4: spdt_led = 4'b0001;
+            `SERVICERESET: spdt_led = 4'b0000;
+            `SERVICE1: spdt_led = 4'b1000;
+            `SERVICE2: spdt_led = 4'b0100;
+            `SERVICE3: spdt_led = 4'b0010;
+            `SERVICE4: spdt_led = 4'b0001;
             default: spdt_led = 4'b0000;
         endcase
     end
@@ -91,7 +92,7 @@ module Main(
             spdt_led = 0; 
         else if (finish4 == 1) 
             spdt_led = 0;
-        else
+        else ;
     end
 
     // store current time and alarm time
@@ -158,9 +159,12 @@ module Main(
     // );
 
     // update current_time
-    always @(posedge clk) begin
+    always @(posedge clk or negedge resetn) begin
         // if current_time is not undefined, update current_time
-        if (current_time !== 16'bx && current_time !== 16'bz) begin
+       if (!resetn) begin
+            current_time <= 16'd0;
+       end
+       else if (current_time !== 16'bx && current_time !== 16'bz) begin
             if (current_time == 16'd5959) begin
                 // Reset to 0000 when current_time is 5959 (59:59)
                 current_time <= 16'd0;
@@ -207,9 +211,15 @@ module NumArrayTo7SegmentArray(
     NumTo7Segment u3 (.number(number3), .seg(seg3));
     NumTo7Segment u4 (.number(number4), .seg(seg4));
 
-    assign segArray = {seg1, seg2, seg3, seg4}; 
+    always @(*) begin
+        segArray[27:21] = seg1;
+        segArray[20:14] = seg2;
+        segArray[13:7]  = seg3;
+        segArray[6:0]   = seg4;
+    end
     // seg1 is at the very left,
     // and  seg4 is at the very right
+
 endmodule
 
 module NumTo7Segment(
