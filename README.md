@@ -75,12 +75,13 @@
     input clk,
     input resetn,     // Reset signal (active low)
     input SPDT4,      // SPDT switch 3
+    input [9:0] SPDTs
     input push_m,     // Push button
+    
     input [15:0] current, // current_time  <br/>
     input [15:0] alarm, // alarm_time  <br/>
-    input push_m,
-    input [9:0] SPDTs
 
-    output [15:0] num //Seg LEDs
-    output [15:0] ? //SPDT LEDs
+    output [2:0] alarm_state,
+    output [15:0] count_state, //Seg LEDs
+    output [9:0] SPDT_LED,
     output finish4
