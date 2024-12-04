@@ -35,7 +35,7 @@ module Main(
     // 1 spdt switch for reset
     input clk_osc, 
     
-    output wire [7:0] eSeg, // 7-segment control
+    output wire [6:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
     output reg [13:0] led, // 4 spdt leds + 10 mini game leds control
     output clk_led // clock led control
