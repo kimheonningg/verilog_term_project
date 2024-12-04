@@ -70,7 +70,7 @@ module Main(
     // interpret leds
     reg [3:0] spdt_led; // 4 leds above spdt switches
     assign led[13:10] = spdt_led;
-    reg [9:0] mini_game_led = led[9:0]; // 10 leds above mini game switches
+    reg [9:0] mini_game_led ; // 10 leds above mini game switches
     assign led[9:0] = mini_game_led;
 
     // assign service buttons 
