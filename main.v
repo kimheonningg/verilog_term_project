@@ -289,14 +289,22 @@ module Main(
         else begin
             if (finish1) current_time <= num1;
             else begin
-                if (current_time == 16'd5959) begin
+                if (current_time == 16'b0101_1001_0101_1001) begin 
                     // Reset to 0000 when current_time is 5959 (59:59)
-                    current_time <= 16'd0;
-                end else if (current_time[7:0] == 8'd59) begin
+                    current_time <= 0;
+                end else if(current_time[11:0] == 12'b1001_0101_1001) begin
+                    // x900
+                    current_time[15:12] <= current_time[15:12] + 1;
+                    current_time[11:8] <= 0;
+                end else if (current_time[7:0] == 8'b0101_1001) begin
                     // If the lower 8 bits of current_time are 59, 
                     // current_time[15:8] + 1 and current_time[7:0] = 0
                     current_time[15:8] <= current_time[15:8] + 1;
-                    current_time[7:0] <= 8'd0;
+                    current_time[7:0] <= 0;
+                end else if(current_time[3:0] == 4'b1001) begin
+                    // xxx9
+                    current_time[3:0] <= 0;
+                    current_time[7:4] <= current_time[7:4] + 1;
                 end else begin
                     // Otherwise, just do + 1
                     current_time <= current_time + 1;
