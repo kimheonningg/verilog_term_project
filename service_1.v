@@ -20,7 +20,7 @@
 
 module Service_1_time_set (
     input clk,
-    input resetn,
+    input reset,
     input spdt1,
     input push_u,
     input push_d,
@@ -35,8 +35,8 @@ module Service_1_time_set (
   reg [1:0] seg; // 3 2 1 0 left to right
 
   // select segment
-  always @(posedge clk) begin
-    if (!resetn) begin
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
       seg <= 0;
       sel <= 0;
     end
@@ -62,8 +62,8 @@ module Service_1_time_set (
   end
 
   // set time
-  always @(posedge clk) begin
-    if (!resetn) num <= 0;
+  always @(posedge clk or posedge reset) begin
+    if (reset) num <= 0;
     else begin
       if (spdt1) begin
         if (push_d) begin
@@ -76,8 +76,8 @@ module Service_1_time_set (
   end
 
   // finish
-  always @(posedge clk) begin
-    if (!resetn) finish1 <= 0;
+  always @(posedge clk or posedge reset) begin
+    if (reset) finish1 <= 0;
     else if (!spdt1 & sel) finish1 <= 1;
   end
 endmodule
