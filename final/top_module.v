@@ -62,10 +62,10 @@ module top_module (
     .RESET(spdt[0]),
     
     .iter(iter),
-    .clk(clk),
-    .sClk(sClk),
-    .s2clk(s2clk),
-    .s10clk(s10clk),
+    .clk(clk), // once in 1 second
+    .sClk(sClk), // once in 1 milli-second
+    .s2clk(s2clk), // once in 2 seconds
+    .s10clk(s10clk), // once in 1/100 seconds
     .reset(reset)
   );
 
