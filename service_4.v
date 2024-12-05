@@ -1,201 +1,337 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Seoul National University. ECE. Logic Design
-// Engineer: Hyewoo Jeong
-//
-// Create Date: 2024/11/10 17:49:08
-// Design Name: Service_4_alarm_check
-// Module Name:
-// Project Name:
-// Target Devices:
-// Tool Versions:
-// Description:
-//
-// Dependencies:
-//
+// Engineer: Huiwone Kim
+// 
+// Create Date: 2024/11/26 16:25:00
+// Design Name: 
+// Module Name: 
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-//
-//////////////////////////////////////a////////////////////////////////////////////
+// 
+//////////////////////////////////////////////////////////////////////////////////
 
-// define state assignment - binary
-`define SWIDTH 3 // State width
-//`define S0 3'b000
-//`define S1 3'b001
-//`define S2 3'b010
-//`define S3 3'b100
+// define constants
+`define SERVICERESET 4'b0000 // reset
+`define SERVICE1 4'b1000 // spdt switch1 on - service 1
+`define SERVICE2 4'b0100 // spdt switch2 on - service 2
+`define SERVICE3 4'b0010 // spdt switch3 on - service 3
+`define SERVICE4 4'b0001 // spdt switch4 on - service 4
 
-`define CWIDTH 16
-`define C0 16'b0000000000000000
-`define C1 16'b0000000000000001
-`define C2 16'b0000000000000010
-`define C3 16'b0000000000000011
-
-`define RWIDTH 10
-`define RN0
-
-module Service_4(
-    input clk,
-    input reset,
-    input SPDT4, // Buttons
-    input [9:0] SPDTs,
-    input push_m,
+// Main module
+module Main(
+    input [4:0] push, // 5 push buttons
+    input [14:0] spdt, 
+    // 4 spdt switches for changing modes + 
+    // 10 spdt switches for mini game +
+    // 1 spdt switch for reset
+    input clk_osc, 
     
-    input [15:0] current, // current_time
-    input [15:0] alarm, // alarm_time
-    
-    output [2:0] alarm_state, // state 1. alarm on, state 2. minigame, state 3. alarm off.
-    output [15:0] count_state,
-    output [9:0] SPDT_LED,
-    output finish4
-);
-    
-    Service_4_alarm_check uut_alarm_check (
-        .clk(clk),
-        .reset(reset),
-        .SPDT4(SPDT4),
-        .current(current),
-        .alarm(alarm),
-        .push_m(push_m),
-        .mini_game(finish4),
-        .alarm_state(alarm_state)//output
+    output reg [6:0] eSeg, // 7-segment control
+    output reg [3:0] anode, // 7-segment control
+    output reg [13:0] led, // 4 spdt leds + 10 mini game leds control
+    output reg temp_led, // led for minigame only
+    output clk_led // clock led control
     );
 
-    // Service_4_minigame
-    Service_4_minigame uut_minigame (
-        .clk(clk),
-        .reset(reset),
-        .alarm_state(alarm_state),
-        .random_led(SPDT_LED),//input
-        .SPDTs(SPDTs),//input
-        .count_state(count_state),//output
-        .mini_game(finish4)//done
-    );
-    
-    Service_4_random uut_random (
-        .clk(clk),
-        .reset(reset),
-        .hot(SPDT_LED)
-    );
-    
-endmodule
-    
+    // interpret spdt switches
+    wire [3:0] spdt_service = spdt[14:11]; // 4 spdt switches for changing modes
+    wire [9:0] spdt_mini_game = spdt[10:1]; // 10 spdt switches for mini game
+    wire RESET = spdt[0]; // 1 spdt switch for reset
+    wire reset;
+    wire clk;
 
-module Service_4_alarm_check(
-    input clk,
-    input reset, // reset
-    input SPDT4, // input string (1bit)
-    input [15:0] current, // current_time
-    input [15:0] alarm, // alarm_time
-    input push_m,
-    input mini_game,
-
-    output reg [2:0] alarm_state // state 1. alarm on, state 2. minigame, state 3. alarm off.
-    
-    );
-    //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
-
-    always @(posedge clk or posedge reset) begin
-        if (reset) alarm_state <= `S0;    
-        else begin
-            if (SPDT4) begin// when time = alarm.
-               case(alarm_state)
-                   `S0: alarm_state <= `S1;
-                   `S1: alarm_state <= ((current == alarm) ? `S2 : `S1);
-                   `S2: alarm_state <= (push_m ? `S3 : `S2);
-                   `S3: alarm_state <= (mini_game ? `S1 : `S3);
-                   default: alarm_state <= `S1;
-               endcase
-            end
-            else alarm_state <= `S0;
-        end
+    // make sClk
+    wire sClk;
+    wire [1:0] iter; // wire for anode handling
+    reg [17:0] counter = 18'd0;
+//    assign iter = counter[3:2];
+    assign iter = counter[12:11]; // counter[3:2]
+    always @(posedge clk_osc or posedge reset) begin
+        if (reset) counter <= 0;
+        else counter <= counter + 1;
     end
-endmodule
-
     
-module Service_4_minigame(
-    input clk,
-    input reset,
-    input [2:0] alarm_state,
-    input [9:0] random_led,
-    input [9:0] SPDTs,
+    assign sClk = counter[15]; //counter[1];
+//    assign sClk = counter[1];
 
-    output reg [15:0] count_state,
-    output reg mini_game
-);
-    // ????? ???? ????
-    wire cmp_game;
+    // connect with make_clk module
+    make_clk make_clk_(
+        .clk_osc(clk_osc),
+        .RESET(RESET), 
+        .clk(clk),
+        .reset(reset)
+    );
 
-    // random_led?? SPDTs ??
-    assign cmp_game = (random_led == SPDTs);
+    // interpret leds
+    reg [3:0] spdt_led = 0; // 4 leds above spdt switches
+    wire [9:0] mini_game_led; // 10 leds above mini game switches
+    
+    // assign service buttons 
+    wire SPDT1, SPDT2, SPDT3, SPDT4;
+    assign SPDT1 = reset ? 0 : spdt_service[3];
+    assign SPDT2 = reset ? 0 : spdt_service[2];
+    assign SPDT3 = reset ? 0 : spdt_service[1];
+    assign SPDT4 = reset ? 0 : spdt_service[0];
+
+    // assign push buttons
+    wire push_u = push[0]; // is push up button pressed
+    wire push_d = push[1]; // is push down button pressed
+    wire push_l = push[2]; // is push left button pressed
+    wire push_r = push[3]; // is push right button pressed
+    wire push_m = push[4]; // is push middle button pressed
+
+    // finish wires
+    wire finish1;
+    wire finish2;
+    wire finish3;
+    wire finish4;
    
-    // Combinational logic for next_count and next_mini_game
+
+    // turn off spdt_leds when it is finished
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            count_state <= `C0;
-            mini_game <= 1'b0;
+            spdt_led <= 0;
         end
         else begin
-           case (alarm_state)
-               `S3: begin
-                   case (count_state)
-                       `C0: begin
-                           count_state <= cmp_game ? `C1 : `C0;
-                           mini_game <= 1'b0;
-                       end
-                       `C1: begin
-                           count_state <= cmp_game ? `C2 : `C0;
-                           mini_game <= 1'b0;
-                       end
-                       `C2: begin
-                           count_state <= cmp_game ? `C3 : `C0;
-                           mini_game <= 1'b0;
-                       end
-                       `C3: begin
-                           count_state <= `C0;
-                           mini_game <= 1'b1;
-                       end
-                       
-                       default: begin
-                           count_state <= `C0;
-                           mini_game <= 1'b0;
-                       end
-                    endcase
-               end
-           default: begin
-                count_state <= `C0;
-                mini_game <= 1'b0;
-                end
-           endcase
+            case(spdt_service)
+                `SERVICERESET: spdt_led <= 4'b0000;
+                `SERVICE1: spdt_led <= 4'b1000;
+                `SERVICE2: spdt_led <= 4'b0100;
+                `SERVICE3: spdt_led <= 4'b0010;
+                `SERVICE4: spdt_led <= 4'b0001;
+                default: spdt_led <= 4'b0000;
+            endcase
         end
-    end    
-endmodule
-
-
-module Service_4_random
-    (
-    input clk,
-    input reset,
-    output reg [9:0] hot // Declare hot as reg
-    );
-
-    wire feedback_value;
-    wire [3:0] q;    
-    reg [3:0] r_reg = 4'b1011; // LFSR initial value
-
+    end
+    
+    reg alarm_on;
+    reg is_count_state = 0; // 1 if we show count_state
+    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
+    
     always @(posedge clk or posedge reset) begin
-        if (reset)
-            r_reg <=  4'b1011; // Use non-blocking assignment
-        else
-            r_reg <= {r_reg[2:0], feedback_value}; // Shift & feedback
+        if (reset) begin
+            led <= 0;
+            is_count_state <= 0;
+            alarm_on <= 0;
+            temp_led <= 0;
+        end else begin
+            if (spdt_service == `SERVICE4) begin
+                case(alarm_state)
+                3'b000: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                3'b001: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                3'b010: begin
+                    is_count_state <= 0;
+                    led <= 14'b11111111111111;
+                    alarm_on <= 1;
+                    temp_led <= 1;
+                end
+                3'b100: begin
+                    is_count_state <= 1;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                default: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+            endcase
+            end else begin
+                led[13:10] <= spdt_led; // 4 leds above spdt switches
+                led[9:0] <= 0; // 10 leds above mini game switches
+            end
+        end
     end
 
-    assign feedback_value = r_reg[3] ^ r_reg[1]; // Feedback value
-    assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
+    // store current time and alarm time
+    reg [15:0] current_time = 0; // current time
+    wire [15:0] alarm_time; // alarm time
 
-    always @(posedge clk or posedge reset) begin
-        if (reset) hot <= 0;
-        else hot <= 10'b0000000001 << q;
+    wire [3:0] which_seg_on1, which_seg_on2; // one-hot style, tells which location segment is on
+
+    wire [6:0] eSegWire; // wire that connects with eSeg
+
+    // clock tick indicator led signal
+    assign clk_led = clk;
+
+    // wire for the output number array for the 7-segment
+    wire [15:0] num3, num4;
+    
+    // TODO: add initial state 0000, with resetn
+
+    reg [3:0] currentNum;
+    wire [15:0] num1;
+
+    always @(posedge clk or posedge reset) begin 
+        if (reset) eSeg <= 0;
+        else eSeg <= eSegWire;
+    end
+
+    // instantiate modules
+    Service_1_time_set service_1(
+        .clk(clk),
+        .reset(reset),
+        .spdt1(SPDT1),
+        .push_u(push_u),
+        .push_d(push_d),
+        .push_l(push_l),
+        .push_r(push_r),
+        .sel(which_seg_on1),
+        .finish1(finish1),
+        .num(num1)
+    );
+    Service_2_alarm_set service_2(
+        .clk(clk),
+        .reset(reset),
+        .spdt2(SPDT2),
+        .push_u(push_u),
+        .push_d(push_d),
+        .push_l(push_l),
+        .push_r(push_r),
+        .sel(which_seg_on2),
+        .finish2(finish2),
+        .alarm(alarm_time)
+    );
+    Service_3_StopWatch service_3(
+        .clk(sClk),
+        .reset(reset),
+        .SPDT3(SPDT3),
+        .push_m(push_m),
+        .segments(num3),
+        .finish3(finish3)
+    );
+    Service_4 service_4(
+        .clk(clk), 
+        .reset(reset), 
+        .SPDT4(SPDT4), 
+        .SPDTs(spdt_mini_game),
+        .push_m(push_m),
+        .current(current_time),
+        .alarm(alarm_time),
+        .alarm_state(alarm_state),
+        .count_state(num4),
+        .SPDT_LED(mini_game_led),
+        .finish4(finish4)
+    );
+    
+//    always @(num1) begin 
+//        current_time = num1;
+//    end
+    
+    
+    reg [3:0] anode_temp;
+    // update segments
+    always @(posedge sClk or posedge reset) begin
+        if (reset) begin
+            anode_temp <= 0;
+            currentNum <= 0;
+            anode <= 4'b1111;
+        end else begin
+            case (iter)
+                2'd0: begin // right-est segment
+                    anode_temp <= 4'b1110;
+                    currentNum <= SPDT1 ? num1[3:0] : ( SPDT2 ? alarm_time[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : current_time[3:0])));
+                end
+                2'd1: begin
+                    anode_temp <= 4'b1101;
+                    currentNum <= SPDT1 ? num1[7:4] : ( SPDT2 ? alarm_time[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : current_time[7:4])));
+                end
+                2'd2: begin
+                    anode_temp <= 4'b1011;
+                    currentNum <= SPDT1 ? num1[11:8] : ( SPDT2 ? alarm_time[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : current_time[11:8])));
+                end
+                2'd3: begin // left-est segment
+                    anode_temp <= 4'b0111;
+                    currentNum <= SPDT1 ? num1[15:12] : ( SPDT2 ? alarm_time[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : current_time[15:12])));
+                end
+                default: begin
+                    anode_temp <= 4'b1111;
+                    currentNum <= 4'b0000; // 0 for default
+                end
+            endcase
+            // on/off
+            if (SPDT1) anode <= (which_seg_on1 == ~anode) ? ~(which_seg_on1 & clk) : anode_temp;
+            else if (SPDT2) anode <= (which_seg_on2 == ~anode) ? ~(which_seg_on2 & clk) : anode_temp;
+            // spdt4
+            else anode <= anode_temp;
+//            anode <= 4'b1110; // test
+        end
+    end
+    
+    // use the NumTo7Segment module to convert number to 7-segment
+    NumTo7Segment numTo7Seg (
+        .number(currentNum),
+        .reset(reset),
+        .clk_osc(clk_osc),
+        .alarm_on(alarm_on),
+        .seg(eSegWire)
+    );
+    
+    // update current_time
+    always @(posedge clk or posedge reset or posedge finish1) begin
+        if (reset) current_time <= 16'd0;
+        // if current_time is not undefined, update current_time
+        else begin
+            if (finish1) current_time <= num1;
+            else begin
+                if (current_time == 16'd5959) begin
+                    // Reset to 0000 when current_time is 5959 (59:59)
+                    current_time <= 16'd0;
+                end else if (current_time[7:0] == 8'd59) begin
+                    // If the lower 8 bits of current_time are 59, 
+                    // current_time[15:8] + 1 and current_time[7:0] = 0
+                    current_time[15:8] <= current_time[15:8] + 1;
+                    current_time[7:0] <= 8'd0;
+                end else begin
+                    // Otherwise, just do + 1
+                    current_time <= current_time + 1;
+                end
+            end
+        end
+    end
+endmodule
+
+module NumTo7Segment(
+    input [3:0] number,
+    input reset,
+    input clk_osc,
+    input alarm_on,
+    output reg [6:0] seg
+);
+    always @(posedge clk_osc or posedge reset) begin
+        if (reset) seg <= 7'b1111111;
+        else if (alarm_on) seg <= ~7'b1111111;
+        else begin
+            case (number)
+                4'b0000: seg <= ~7'b0111111; // 0
+                4'b0001: seg <= ~7'b0000110; // 1
+                4'b0010: seg <= ~7'b1011011; // 2
+                4'b0011: seg <= ~7'b1001111; // 3
+                4'b0100: seg <= ~7'b1100110; // 4
+                4'b0101: seg <= ~7'b1101101; // 5
+                4'b0110: seg <= ~7'b1111101; // 6
+                4'b0111: seg <= ~7'b0000111; // 7
+                4'b1000: seg <= ~7'b1111111; // 8
+                4'b1001: seg <= ~7'b1101111; // 9
+                default: seg <= ~7'b0000000; // Blank for invalid input
+            endcase
+        end
     end
 endmodule
