@@ -112,6 +112,8 @@ module Main(
     end
     
     reg alarm_on;
+    reg is_count_state = 0; // 1 if we show count_state
+    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
     
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -155,14 +157,10 @@ module Main(
             end
         end
     end
-    
-    reg is_count_state = 0; // 1 if we show count_state
 
     // store current time and alarm time
     reg [15:0] current_time = 0; // current time
     wire [15:0] alarm_time; // alarm time
-
-    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
 
     wire [3:0] which_seg_on1, which_seg_on2; // one-hot style, tells which location segment is on
 
@@ -177,7 +175,7 @@ module Main(
     // TODO: add initial state 0000, with resetn
 
     reg [3:0] currentNum;
-    wire [3:0] num1;
+    wire [15:0] num1;
 
     always @(posedge clk or posedge reset) begin 
         if (reset) eSeg <= 0;
@@ -210,7 +208,7 @@ module Main(
         .alarm(alarm_time)
     );
     Service_3_StopWatch service_3(
-        .clk(clk_osc),
+        .clk(sClk),
         .reset(reset),
         .SPDT3(SPDT3),
         .push_m(push_m),
@@ -236,37 +234,41 @@ module Main(
 //    end
     
     
-    
+    reg [3:0] anode_temp;
     // update segments
     always @(posedge sClk or posedge reset) begin
         if (reset) begin
-            anode <= 0;
+            anode_temp <= 0;
             currentNum <= 0;
+            anode <= 4'b1111;
         end else begin
             case (iter)
                 2'd0: begin // right-est segment
-                    anode <= 4'b1110;
-                    currentNum <= SPDT1 ? current_time[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : 0));
+                    anode_temp <= 4'b1110;
+                    currentNum <= SPDT1 ? num1[3:0] : ( SPDT2 ? alarm_time[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : current_time[3:0])));
                 end
                 2'd1: begin
-                    anode <= 4'b1101;
-                    currentNum <= SPDT1 ? current_time[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : 0));
+                    anode_temp <= 4'b1101;
+                    currentNum <= SPDT1 ? num1[7:4] : ( SPDT2 ? alarm_time[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : current_time[7:4])));
                 end
                 2'd2: begin
-                    anode <= 4'b1011;
-                    currentNum <= SPDT1 ? current_time[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : 0));
+                    anode_temp <= 4'b1011;
+                    currentNum <= SPDT1 ? num1[11:8] : ( SPDT2 ? alarm_time[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : current_time[11:8])));
                 end
                 2'd3: begin // left-est segment
-                    anode <= 4'b0111;
-                    currentNum <= SPDT1 ? current_time[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : 0));
+                    anode_temp <= 4'b0111;
+                    currentNum <= SPDT1 ? num1[15:12] : ( SPDT2 ? alarm_time[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : current_time[15:12])));
                 end
                 default: begin
-                    anode <= 4'b1111;
+                    anode_temp <= 4'b1111;
                     currentNum <= 4'b0000; // 0 for default
                 end
             endcase
-            if(which_seg_on1 == anode) anode <= (!(which_seg_on1) & clk);
-            if(which_seg_on2 == anode) anode <= (!(which_seg_on2) & clk);
+            // on/off
+            if (SPDT1) anode <= (which_seg_on1 == ~anode) ? ~(which_seg_on1 & clk) : anode_temp;
+            else if (SPDT2) anode <= (which_seg_on2 == ~anode) ? ~(which_seg_on2 & clk) : anode_temp;
+            // spdt4
+            else anode <= anode_temp;
         end
     end
     
@@ -311,21 +313,21 @@ module NumTo7Segment(
     output reg [6:0] seg
 );
     always @(posedge clk_osc or posedge reset) begin
-        if (reset) seg <= 0;
-        else if (alarm_on) seg <= 7'b1111111;
+        if (reset) seg <= 7'b1111111;
+        else if (alarm_on) seg <= ~7'b1111111;
         else begin
             case (number)
-                4'b0000: seg <= 7'b0111111; // 0
-                4'b0001: seg <= 7'b0000110; // 1
-                4'b0010: seg <= 7'b1011011; // 2
-                4'b0011: seg <= 7'b1001111; // 3
-                4'b0100: seg <= 7'b1100110; // 4
-                4'b0101: seg <= 7'b1101101; // 5
-                4'b0110: seg <= 7'b1111101; // 6
-                4'b0111: seg <= 7'b0000111; // 7
-                4'b1000: seg <= 7'b1111111; // 8
-                4'b1001: seg <= 7'b1101111; // 9
-                default: seg <= 7'b0000000; // Blank for invalid input
+                4'b0000: seg <= ~7'b0111111; // 0
+                4'b0001: seg <= ~7'b0000110; // 1
+                4'b0010: seg <= ~7'b1011011; // 2
+                4'b0011: seg <= ~7'b1001111; // 3
+                4'b0100: seg <= ~7'b1100110; // 4
+                4'b0101: seg <= ~7'b1101101; // 5
+                4'b0110: seg <= ~7'b1111101; // 6
+                4'b0111: seg <= ~7'b0000111; // 7
+                4'b1000: seg <= ~7'b1111111; // 8
+                4'b1001: seg <= ~7'b1101111; // 9
+                default: seg <= ~7'b0000000; // Blank for invalid input
             endcase
         end
     end
