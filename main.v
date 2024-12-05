@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: NOT USED ANYMORE
 // 
 // Dependencies: 
 // 
@@ -27,6 +27,7 @@
 `define SERVICE4 4'b0001 // spdt switch4 on - service 4
 
 // Main module
+// ################################ USE TOP_MODULE.V & FUNCTIONS.V INSTEAD ################################
 module Main(
     input [4:0] push, // 5 push buttons
     input [14:0] spdt, 

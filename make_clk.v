@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company:    SNU 
-// Engineer:    SNUCAD 
+// Company:    Seoul National University. ECE. Logic Design
+// Engineer:   Group 8
 // 
-// Create Date:    11/08/2021 
-// Design Name:    Traffic Light Controller 
+// Create Date:    2024/12/05
+// Design Name:    
 // Module Name:    make_clk 
-// Project Name:    TLC 
-// Description:    Digital Logic Design and Lab (2021, Fall semester, 430.201A_001) 
+// Project Name:   
+// Description:    
 //
 // Revision 0.01 - File Created
 //
