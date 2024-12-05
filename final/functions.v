@@ -83,7 +83,7 @@ module set_led(
               end
               3'b010: begin
                 is_count_state <= 0;
-                led <= 14'b11111111111111;
+                led <= 14'b11111111111111 & {14{clk}};
                 alarm_on <= 1;
                 temp_led <= 1;
               end
@@ -124,6 +124,7 @@ module set_anode(
   input SPDT1,
   input SPDT2,
   input SPDT3,
+  input SPDT4,
   input [15:0] alarm_time,
   input [2:0] alarm_state,
   input [3:0] which_seg_on1,
@@ -144,24 +145,28 @@ module set_anode(
         2'd0: begin // right-est segment
             if (SPDT1 & which_seg_on1 == 4'b0001) anode <= ~(which_seg_on1 & {4{clk}});
             else if (SPDT2 & which_seg_on2 == 4'b0001) anode <= ~(which_seg_on2 & {4{clk}});
+            else if (SPDT4 & alarm_state == 3'b010) anode <= (4'b1110 & {4{clk}});
             else anode <= 4'b1110;
             currentNum <= SPDT1 ? num1[7:4] : ( SPDT2 ? alarm_time[7:4] : (SPDT3 ? num3[7:4] : (alarm_state == 3'b100 ? num4[7:4] : current_time[7:4])));
         end
         2'd1: begin
             if (SPDT1 & which_seg_on1 == 4'b0010) anode <= ~(which_seg_on1 & {4{clk}});
             else if (SPDT2 & which_seg_on2 == 4'b0010) anode <= ~(which_seg_on2 & {4{clk}});
+            else if (SPDT4 & alarm_state == 3'b010) anode <= (4'b1101 & {4{clk}});
             else anode <= 4'b1101;
             currentNum <= SPDT1 ? num1[11:8] : ( SPDT2 ? alarm_time[11:8] : (SPDT3 ? num3[11:8] : (alarm_state == 3'b100 ? num4[11:8] : current_time[11:8])));
         end
         2'd2: begin
             if (SPDT1 & which_seg_on1 == 4'b0100) anode <= ~(which_seg_on1 & {4{clk}});
             else if (SPDT2 & which_seg_on2 == 4'b0100) anode <= ~(which_seg_on2 & {4{clk}});
+            else if (SPDT4 & alarm_state == 3'b010) anode <= (4'b1011 & {4{clk}});
             else anode <= 4'b1011;
             currentNum <= SPDT1 ? num1[15:12] : ( SPDT2 ? alarm_time[15:12] : (SPDT3 ? num3[15:12] : (alarm_state == 3'b100 ? num4[15:12] : current_time[15:12])));
         end
         2'd3: begin // left-est segment
             if (SPDT1 & which_seg_on1 == 4'b1000) anode <= ~(which_seg_on1 & {4{clk}});
             else if (SPDT2 & which_seg_on2 == 4'b1000) anode <= ~(which_seg_on2 & {4{clk}});
+            else if (SPDT4 & alarm_state == 3'b010) anode <= (4'b0111 & {4{clk}});
             else anode <= 4'b0111;
             currentNum <= SPDT1 ? num1[3:0] : ( SPDT2 ? alarm_time[3:0] : (SPDT3 ? num3[3:0] : (alarm_state == 3'b100 ? num4[3:0] : current_time[3:0])));
         end
