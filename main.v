@@ -305,7 +305,7 @@ module Main(
                 end else if(current_time[11:0] == 12'b1001_0101_1001) begin
                     // x900
                     current_time[15:12] <= current_time[15:12] + 1;
-                    current_time[11:8] <= 0;
+                    current_time[11:0] <= 0;
                 end else if (current_time[7:0] == 8'b0101_1001) begin
                     // If the lower 8 bits of current_time are 59, 
                     // current_time[15:8] + 1 and current_time[7:0] = 0
@@ -313,8 +313,8 @@ module Main(
                     current_time[7:0] <= 0;
                 end else if(current_time[3:0] == 4'b1001) begin
                     // xxx9
-                    current_time[3:0] <= 0;
                     current_time[7:4] <= current_time[7:4] + 1;
+                    current_time[3:0] <= 0;
                 end else begin
                     // Otherwise, just do + 1
                     current_time <= current_time + 1;
