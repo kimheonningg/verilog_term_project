@@ -62,7 +62,7 @@ module Service_3_StopWatch(
                         end else if(clk_count[11:0] == 12'b1001_1001_1001) begin
                             // x900
                             clk_count[15:12] <= clk_count[15:12] + 1;
-                            clk_count[11:8] <= 0;
+                            clk_count[11:0] <= 0;
                         end else if (clk_count[7:0] == 8'b1001_1001) begin
                             // If the lower 8 bits of current_time are 59, 
                             // current_time[15:8] + 1 and current_time[7:0] = 0
