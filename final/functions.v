@@ -89,7 +89,7 @@ module set_led(
               end
               3'b100: begin
                 led[9:0] <= mini_game_led;
-                led[13:0] <= 0;
+                led[13:10] <= 0;
                 is_count_state <= 1;
                 alarm_on <= 0;
                 temp_led <= 0;
