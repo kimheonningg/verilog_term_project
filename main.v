@@ -52,13 +52,13 @@ module Main(
     wire sClk;
     wire [1:0] iter; // wire for anode handling
     reg [17:0] counter = 18'd0;
-    assign iter = counter[17:16];
+    assign iter = counter[3:2]; //counter[17:16];
     always @(posedge clk_osc or posedge reset) begin
         if (reset) counter <= 0;
         else counter <= counter + 1;
     end
 
-    assign sClk = counter[15];
+    assign sClk = counter[1];//counter[15];
 
     // connect with make_clk module
     make_clk make_clk_(
@@ -119,7 +119,7 @@ module Main(
     reg is_count_state = 0; // 1 if we show count_state
 
     // store current time and alarm time
-    reg [15:0] current_time; // current time
+    reg [15:0] current_time = 0; // current time
     wire [15:0] alarm_time; // alarm time
 
     wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
@@ -215,6 +215,10 @@ module Main(
         .SPDT_LED(mini_game_led),
         .finish4(finish4)
     );
+    
+    always @(num1) begin 
+        current_time = num1;
+    end
 
     // update segments
     always @(posedge sClk or posedge reset) begin

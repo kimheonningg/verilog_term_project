@@ -37,7 +37,7 @@ module Service_3_StopWatch(
 );
 
     // Parameters for timing
-    parameter CLOCK_FREQ = 100_000_000; // Clock frequency (100MHz)
+    parameter CLOCK_FREQ = 100;//50_000_000; // Clock frequency (100MHz)
     parameter HUNDREDTH_TICK = CLOCK_FREQ / 100; // 1/100 second tick
     
     reg [26:0] clk_count;  // Clock counter for timing
@@ -49,7 +49,7 @@ module Service_3_StopWatch(
     // State transitions and control logic
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            // Reset all state-related signals
+            // Reset all state-related signals 
             stopwatch_state <= `S0;
             clk_count <= 0;
             seconds <= 0;
@@ -103,22 +103,22 @@ module Service_3_StopWatch(
     end
 
     // Next state logic
-    always @(*) begin
+    always @(negedge push_m or negedge reset or posedge SPDT3) begin
         if (reset) begin
             next_state = 0;
         end else begin
             case (stopwatch_state)
                 `S0: next_state = (SPDT3 ? `S1 : `S0); // Idle -> Initialized if SPDT3 ON
-                `S1: next_state = (push_m ? `S2 : `S1); // Initialized -> Running if push_m
-                `S2: next_state = (push_m ? `S3 : `S2); // Running -> Paused if push_m
-                `S3: next_state = (push_m ? `S2 : `S3); // Paused -> Running if push_m
+                `S1: next_state = (push_m ? `S1 : `S2); // Initialized -> Running if push_m
+                `S2: next_state = (push_m ? `S2 : `S3); // Running -> Paused if push_m
+                `S3: next_state = (push_m ? `S3 : `S2); // Paused -> Running if push_m
                 default: next_state = `S0;
             endcase
         end
     end
 
     // Convert time to 7-segment display values (using a 16-bit register)
-    always @(*) begin
+    always @(seconds or hundredths) begin
         if (reset) begin
             // Seconds
             segments[15:12] = seconds / 10; // Tens of seconds
