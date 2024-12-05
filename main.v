@@ -53,16 +53,15 @@ module Main(
     wire sClk;
     wire [1:0] iter; // wire for anode handling
     reg [17:0] counter = 18'd0;
-//    assign iter = counter[3:2];
-    assign iter = counter[12:11]; // counter[3:2]
+
     always @(posedge clk_osc or posedge reset) begin
         if (reset) counter <= 0;
         else counter <= counter + 1;
     end
     
     assign sClk = counter[15]; //counter[1];
-//    assign sClk = counter[1];
-
+    assign iter = counter[17:16]; // counter[3:2]
+    
     // connect with make_clk module
     make_clk make_clk_(
         .clk_osc(clk_osc),
@@ -95,6 +94,7 @@ module Main(
     wire finish3;
     wire finish4;
    
+
     // turn off spdt_leds when it is finished
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -106,6 +106,7 @@ module Main(
                 `SERVICE1: spdt_led <= 4'b1000;
                 `SERVICE2: spdt_led <= 4'b0100;
                 `SERVICE3: spdt_led <= 4'b0010;
+                `SERVICE4: spdt_led <= 4'b0001;
                 default: spdt_led <= 4'b0000;
             endcase
         end
@@ -128,13 +129,11 @@ module Main(
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
-                    led <= 0;
                 end
                 3'b001: begin
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
-                    led <= 0;
                 end
                 3'b010: begin
                     is_count_state <= 0;
@@ -144,16 +143,15 @@ module Main(
                 end
                 3'b100: begin
                     is_count_state <= 1;
-                    alarm_on <= 0;
-                    temp_led <= 0;
                     led[13:10] <= 0;
                     led[9:0] <= mini_game_led;
+                    alarm_on <= 0;
+                    temp_led <= 0;
                 end
                 default: begin
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
-                    led <= 0;
                 end
             endcase
             end else begin
@@ -182,10 +180,7 @@ module Main(
     reg [3:0] currentNum;
     wire [15:0] num1;
 
-    always @(posedge sClk or posedge reset) begin 
-        if (reset) eSeg <= 0;
-        else eSeg <= eSegWire;
-    end
+    
 
     // instantiate modules
     Service_1_time_set service_1(
@@ -217,8 +212,7 @@ module Main(
         .reset(reset),
         .SPDT3(SPDT3),
         .push_m(push_m),
-        .segments(num3),
-        .finish3(finish3)
+        .clk_count(num3)
     );
     Service_4 service_4(
         .clk(clk), 
@@ -233,7 +227,12 @@ module Main(
         .SPDT_LED(mini_game_led),
         .finish4(finish4)
     );
-
+    
+//    always @(num1) begin 
+//        current_time = num1;
+//    end
+    
+    
     reg [3:0] anode_temp;
     // update segments
     always @(posedge sClk or posedge reset) begin
@@ -244,19 +243,19 @@ module Main(
         end else begin
             case (iter)
                 2'd0: begin // right-est segment
-                    anode_temp <= 4'b1110;
+                    anode_temp <= 4'b0111;
                     currentNum <= SPDT1 ? num1[3:0] : ( SPDT2 ? alarm_time[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : current_time[3:0])));
                 end
                 2'd1: begin
-                    anode_temp <= 4'b1101;
+                    anode_temp <= 4'b1110;
                     currentNum <= SPDT1 ? num1[7:4] : ( SPDT2 ? alarm_time[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : current_time[7:4])));
                 end
                 2'd2: begin
-                    anode_temp <= 4'b1011;
+                    anode_temp <= 4'b1101;
                     currentNum <= SPDT1 ? num1[11:8] : ( SPDT2 ? alarm_time[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : current_time[11:8])));
                 end
                 2'd3: begin // left-est segment
-                    anode_temp <= 4'b0111;
+                    anode_temp <= 4'b1011;
                     currentNum <= SPDT1 ? num1[15:12] : ( SPDT2 ? alarm_time[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : current_time[15:12])));
                 end
                 default: begin
@@ -265,10 +264,10 @@ module Main(
                 end
             endcase
             // on/off
-            if (SPDT1) anode <= (which_seg_on1 == ~anode) ? ~(which_seg_on1 & clk) : anode_temp;
-            else if (SPDT2) anode <= (which_seg_on2 == ~anode) ? ~(which_seg_on2 & clk) : anode_temp;
+           if (SPDT1) anode <= (which_seg_on1 == ~anode) ? ~(which_seg_on1 & clk) : anode_temp;
+           else if (SPDT2) anode <= (which_seg_on2 == ~anode) ? ~(which_seg_on2 & clk) : anode_temp;
             // spdt4
-            else anode <= anode_temp;
+            anode <= anode_temp;
 //            anode <= 4'b1110; // test
         end
     end
@@ -282,6 +281,11 @@ module Main(
         .seg(eSegWire)
     );
     
+    always @(posedge sClk or posedge reset) begin 
+        if (reset) eSeg <= 0;
+        else eSeg <= eSegWire;
+    end
+
     // update current_time
     always @(posedge clk or posedge reset or posedge finish1) begin
         if (reset) current_time <= 16'd0;
