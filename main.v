@@ -146,7 +146,8 @@ module Main(
                     is_count_state <= 1;
                     alarm_on <= 0;
                     temp_led <= 0;
-                    led <= 0;
+                    led[13:10] <= 0;
+                    led[9:0] <= mini_game_led;
                 end
                 default: begin
                     is_count_state <= 0;
@@ -232,12 +233,7 @@ module Main(
         .SPDT_LED(mini_game_led),
         .finish4(finish4)
     );
-    
-//    always @(num1) begin 
-//        current_time = num1;
-//    end
-    
-    
+
     reg [3:0] anode_temp;
     // update segments
     always @(posedge sClk or posedge reset) begin
