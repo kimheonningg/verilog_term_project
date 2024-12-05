@@ -92,7 +92,7 @@
     output [9:0] SPDT_LED, // above SPDTs
     output finish4 
 
-#기능별 구현.
+# 기능별 구현.
 
 ## 0. 기본 동작
 1. 7 segment에 시각 출력
@@ -106,7 +106,7 @@
 
 
 ## 1. 기능 1: 시각 설정
- SPDT switch 1과 push button switch 4개 사용
+ SPDT switch 1과 push button switch 4개 사용  
 ■ 1. SPDT switch 1 on  
 ❑ SPDT switch 1 위의 LED도 함께 on  
 ■ 2. 첫 번째 7 segment 점멸 (clk)  
