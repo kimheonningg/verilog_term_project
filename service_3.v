@@ -37,7 +37,7 @@ module Service_3_StopWatch(
 );
 
     // Parameters for timing
-    parameter CLOCK_FREQ = 100;//50_000_000; // Clock frequency (100MHz)
+    parameter CLOCK_FREQ = 50_000_000; //50_000_000; // Clock frequency (50MHz)
     parameter HUNDREDTH_TICK = CLOCK_FREQ / 100; // 1/100 second tick
     
     reg [26:0] clk_count;  // Clock counter for timing
