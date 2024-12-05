@@ -95,7 +95,6 @@ module Main(
     wire finish3;
     wire finish4;
    
-
     // turn off spdt_leds when it is finished
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -107,7 +106,6 @@ module Main(
                 `SERVICE1: spdt_led <= 4'b1000;
                 `SERVICE2: spdt_led <= 4'b0100;
                 `SERVICE3: spdt_led <= 4'b0010;
-                `SERVICE4: spdt_led <= 4'b0001;
                 default: spdt_led <= 4'b0000;
             endcase
         end
@@ -130,11 +128,13 @@ module Main(
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
+                    led <= 0;
                 end
                 3'b001: begin
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
+                    led <= 0;
                 end
                 3'b010: begin
                     is_count_state <= 0;
@@ -146,11 +146,13 @@ module Main(
                     is_count_state <= 1;
                     alarm_on <= 0;
                     temp_led <= 0;
+                    led <= 0;
                 end
                 default: begin
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
+                    led <= 0;
                 end
             endcase
             end else begin
