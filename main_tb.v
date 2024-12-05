@@ -30,7 +30,12 @@ module Main_tb;
     );
 
     // Clock generation
-    always #5 clk_osc = ~clk_osc; // 100 MHz clock
+    initial begin
+        clk_osc = 0;
+        forever begin
+            #1 clk_osc = ~clk_osc;
+        end
+    end
 
     initial begin
         // Initialize Inputs
