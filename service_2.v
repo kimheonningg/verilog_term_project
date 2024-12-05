@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Seoul National University. ECE. Logic Design
 // Engineer: HyoJeong Yu
@@ -28,11 +29,12 @@ module Service_2_alarm_set (
     input push_r,
 
     output reg [3:0] sel,
-    output reg finish2,
     output reg [15:0] alarm // 15:12 11:8 7:4 3:0 = min min sec sec, each 4bit 0-9
 );
 
   reg [1:0] seg; // 3 2 1 0 left to right
+  reg finish2;
+  reg start;
 
   // select segment
   always @(posedge clk or posedge reset) begin
@@ -57,7 +59,10 @@ module Service_2_alarm_set (
           end
         end
       end
-      if (finish2) sel <= 4'b1111;
+      if (finish2) begin
+        sel <= 4'b1000;
+        seg <= 3;
+      end
     end
   end
 
@@ -68,19 +73,30 @@ module Service_2_alarm_set (
     end
     else begin
       if (spdt2) begin
-        if (push_d) begin
-          alarm[4*seg+:4] <= (alarm[4*seg+:4] == 0) ? 9 : alarm[4*seg+:4] - 1;
-        end else if (push_u) begin
-          alarm[4*seg+:4] <= alarm[4*seg+:4] == 9 ? 0 : alarm[4*seg+:4] + 1;
+        if (sel) begin
+            if (push_d) begin
+              alarm[4*seg+:4] <= (alarm[4*seg+:4] == 0) ? 9 : alarm[4*seg+:4] - 1;
+            end else if (push_u) begin
+              alarm[4*seg+:4] <= (alarm[4*seg+:4] == 9) ? 0 : alarm[4*seg+:4] + 1;
+            end
         end
       end
     end
   end
-
-  // finish
+  
   always @(posedge clk or posedge reset) begin
-    if (reset) finish2 <= 0;
-    else if (!spdt2 & sel) finish2 <= 1;
+    if (reset) begin
+        finish2 <= 0;
+        start <= 0;
+    end else begin
+        if (spdt2) start <= 1;
+        
+        if (finish2) finish2 <= 0;
+        else if (!spdt2 & start) begin
+            finish2 <= 1;
+            start <= 0;
+        end
+    end
   end
 endmodule
 
