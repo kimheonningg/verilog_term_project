@@ -108,6 +108,31 @@ module Main(
         led[13:10] = spdt_led; // 4 leds above spdt switches
         led[9:0] = mini_game_led; // 10 leds above mini game switches
     end
+    
+    reg is_count_state = 0; // 1 if we show count_state
+
+    // handle alarm_state
+    always @(alarm_state) begin
+        case(alarm_state)
+            3'b000: begin
+                is_count_state = 0;
+            end
+            3'b000: begin
+                is_count_state = 0;
+            end
+            3'b010: begin
+                is_count_state = 0;
+                led <= 14'b11111111111111;
+                eSeg <= 7'b1111111;
+            end
+            3'b100: begin
+                is_count_state = 1;
+            end
+            default: begin
+                is_count_state = 0;
+            end
+        endcase
+    end
 
     // store current time and alarm time
     reg [15:0] current_time; // current time
@@ -179,19 +204,19 @@ module Main(
         case (iter)
             2'd0: begin // right-est segment
                 anode <= 4'b1110;
-                currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : (SPDT4 ? num4[3:0] : 0));
+                currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : 0));
             end
             2'd1: begin
                 anode <= 4'b1101;
-                currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : (SPDT4 ? num4[7:4] : 0));
+                currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : 0));
             end
             2'd2: begin
                 anode <= 4'b1011;
-                currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : (SPDT4 ? num4[11:8] : 0));
+                currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : 0));
             end
             2'd3: begin // left-est segment
                 anode <= 4'b0111;
-                currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : (SPDT4 ? num4[15:12] : 0));
+                currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : 0));
             end
             default: begin
                 anode <= 4'b1111;
