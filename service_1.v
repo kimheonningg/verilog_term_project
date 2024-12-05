@@ -77,7 +77,7 @@ module Service_1_time_set (
   end
     
   // finish
-  always @(posedge clk or posedge reset or posedge spdt1) begin
+  always @(posedge clk or posedge reset) begin
     if (reset) begin
         finish1 <= 0;
         start <= 0;
