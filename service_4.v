@@ -21,10 +21,10 @@
 
 // define state assignment - binary
 `define SWIDTH 3 // State width
-`define S0 3'b000
-`define S1 3'b001
-`define S2 3'b010
-`define S3 3'b100
+//`define S0 3'b000
+//`define S1 3'b001
+//`define S2 3'b010
+//`define S3 3'b100
 
 `define CWIDTH 16
 `define C0 16'b0000000000000000
@@ -37,7 +37,7 @@
 
 module Service_4(
     input clk,
-    input resetn,
+    input reset,
     input SPDT4, // Buttons
     input [9:0] SPDTs,
     input push_m,
@@ -53,7 +53,7 @@ module Service_4(
     
     Service_4_alarm_check uut_alarm_check (
         .clk(clk),
-        .resetn(resetn),
+        .reset(reset),
         .SPDT4(SPDT4),
         .current(current),
         .alarm(alarm),
@@ -65,7 +65,7 @@ module Service_4(
     // Service_4_minigame
     Service_4_minigame uut_minigame (
         .clk(clk),
-        .resetn(resetn),
+        .reset(reset),
         .alarm_state(alarm_state),
         .random_led(SPDT_LED),//input
         .SPDTs(SPDTs),//input
@@ -75,7 +75,7 @@ module Service_4(
     
     Service_4_random uut_random (
         .clk(clk),
-        .resetn(resetn),
+        .reset(reset),
         .hot(SPDT_LED)
     );
     
@@ -84,7 +84,7 @@ endmodule
 
 module Service_4_alarm_check(
     input clk,
-    input resetn, // reset
+    input reset, // reset
     input SPDT4, // input string (1bit)
     input [15:0] current, // current_time
     input [15:0] alarm, // alarm_time
@@ -96,21 +96,19 @@ module Service_4_alarm_check(
     );
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
 
-    always @(posedge clk) begin
-        if (!resetn)
-            alarm_state <= `S0;    
+    always @(posedge clk or posedge reset) begin
+        if (reset) alarm_state <= `S0;    
         else begin
-        if (SPDT4) begin// when time = alarm.
-                   case(alarm_state)
-                       `S0: alarm_state <= `S1;
-                       `S1: alarm_state <= ((current == alarm) ? `S2 : `S1);
-                       `S2: alarm_state <= (push_m ? `S3 : `S2);
-                       `S3: alarm_state <= (mini_game ? `S1 : `S3);
-                       default: alarm_state <= `S1;
-                   endcase
-               end
-               else
-                   alarm_state = `S0;
+            if (SPDT4) begin// when time = alarm.
+               case(alarm_state)
+                   `S0: alarm_state <= `S1;
+                   `S1: alarm_state <= ((current == alarm) ? `S2 : `S1);
+                   `S2: alarm_state <= (push_m ? `S3 : `S2);
+                   `S3: alarm_state <= (mini_game ? `S1 : `S3);
+                   default: alarm_state <= `S1;
+               endcase
+            end
+            else alarm_state = `S0;
         end
     end
 endmodule
@@ -118,7 +116,7 @@ endmodule
     
 module Service_4_minigame(
     input clk,
-    input resetn,
+    input reset,
     input [2:0] alarm_state,
     input [9:0] random_led,
     input [9:0] SPDTs,
@@ -133,8 +131,8 @@ module Service_4_minigame(
     assign cmp_game = (random_led == SPDTs);
    
     // Combinational logic for next_count and next_mini_game
-    always @(posedge clk or negedge resetn) begin
-        if (!resetn) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
             count_state = `C0;
             mini_game = 1'b0;
         end
@@ -178,25 +176,26 @@ endmodule
 module Service_4_random
     (
     input clk,
-    input resetn,
+    input reset,
     output reg [9:0] hot // Declare hot as reg
     );
 
     wire feedback_value;
     wire [3:0] q;    
-    reg [7:0] r_reg = 8'b1011_1001; // LFSR initial value
+    reg [3:0] r_reg = 4'b1011; // LFSR initial value
 
-    always @(posedge clk) begin
-        if (!resetn)
-            r_reg <= 8'b1011_1001; // Use non-blocking assignment
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            r_reg <=  4'b1011; // Use non-blocking assignment
         else
-            r_reg <= {r_reg[6:0], feedback_value}; // Shift & feedback
+            r_reg <= {r_reg[2:0], feedback_value}; // Shift & feedback
     end
 
-    assign feedback_value = r_reg[7] ^ r_reg[5]; // Feedback value
-    assign q = r_reg%10;//(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
+    assign feedback_value = r_reg[3] ^ r_reg[1]; // Feedback value
+    assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
 
-    always @(*) begin
-        hot = 10'b0000000001 << q;
+    always @(posedge clk or posedge reset) begin
+        if (reset) hot = 0;
+        else hot = 10'b0000000001 << q;
     end
 endmodule
