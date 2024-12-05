@@ -60,8 +60,8 @@ module Service_1_time_set (
         end
       end
       if (finish1) begin
-        sel <= 0;
-        seg <= 0;
+        sel <= 4'b1000;
+        seg <= 3;
       end
     end
   end
