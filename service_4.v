@@ -97,7 +97,7 @@ module Service_4_alarm_check(
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
 
     always @(posedge s2clk or posedge reset) begin
-        if (reset) alarm_state <= `S0;    
+        if (reset || !SPDT4) alarm_state <= `S0;    
         else begin
             if (SPDT4) begin// when time = alarm.
                case(alarm_state)
@@ -139,6 +139,10 @@ module Service_4_minigame(
         end
         else begin
            case (alarm_state)
+               `S0: begin
+                   count_state <= `C0;
+                   mini_game <=1'b0;
+               end
                `S3: begin
                    case (count_state)
                        `C0: begin
