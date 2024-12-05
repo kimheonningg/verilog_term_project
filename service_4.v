@@ -36,7 +36,6 @@
 `define RN0
 
 module Service_4(
-    input clk,
     input s2clk,
     input reset,
     input SPDT4, // Buttons
@@ -53,7 +52,7 @@ module Service_4(
     wire finish4;
     
     Service_4_alarm_check uut_alarm_check (
-        .clk(clk),
+        .s2clk(s2clk),
         .reset(reset),
         .SPDT4(SPDT4),
         .current(current),
@@ -84,7 +83,7 @@ endmodule
     
 
 module Service_4_alarm_check(
-    input clk,
+    input s2clk,
     input reset, // reset
     input SPDT4, // input string (1bit)
     input [15:0] current, // current_time
@@ -97,7 +96,7 @@ module Service_4_alarm_check(
     );
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
 
-    always @(posedge clk or posedge reset) begin
+    always @(posedge s2clk or posedge reset) begin
         if (reset) alarm_state <= `S0;    
         else begin
             if (SPDT4) begin// when time = alarm.
