@@ -182,7 +182,7 @@ module Main(
     reg [3:0] currentNum;
     wire [15:0] num1;
 
-    always @(posedge clk or posedge reset) begin 
+    always @(posedge sClk or posedge reset) begin 
         if (reset) eSeg <= 0;
         else eSeg <= eSegWire;
     end
@@ -277,7 +277,7 @@ module Main(
     NumTo7Segment numTo7Seg (
         .number(currentNum),
         .reset(reset),
-        .clk_osc(clk_osc),
+        .clk_osc(sClk),
         .alarm_on(alarm_on),
         .seg(eSegWire)
     );
