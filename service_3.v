@@ -29,7 +29,7 @@
 // Stopwatch module
 module Service_3_StopWatch(
     input clk,        // Main clock
-    input resetn,     // Reset signal (active low)
+    input reset,     // Reset signal (active low)
     input SPDT3,      // SPDT switch 3
     input push_m,     // Push button
     output reg [15:0] segments, // Combined segments for seg1, seg2, seg3, seg4
@@ -47,8 +47,8 @@ module Service_3_StopWatch(
     reg running;           // Stopwatch running flag
 
     // State transitions and control logic
-    always @(posedge clk) begin
-        if (!resetn) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
             // Reset all state-related signals
             stopwatch_state <= `S0;
             clk_count <= 0;
@@ -104,29 +104,35 @@ module Service_3_StopWatch(
 
     // Next state logic
     always @(*) begin
-        case (stopwatch_state)
-            `S0: next_state = (SPDT3 ? `S1 : `S0); // Idle -> Initialized if SPDT3 ON
-            `S1: next_state = (push_m ? `S2 : `S1); // Initialized -> Running if push_m
-            `S2: next_state = (push_m ? `S3 : `S2); // Running -> Paused if push_m
-            `S3: next_state = (push_m ? `S2 : `S3); // Paused -> Running if push_m
-            default: next_state = `S0;
-        endcase
+        if (reset) begin
+            next_state = 0;
+        end else begin
+            case (stopwatch_state)
+                `S0: next_state = (SPDT3 ? `S1 : `S0); // Idle -> Initialized if SPDT3 ON
+                `S1: next_state = (push_m ? `S2 : `S1); // Initialized -> Running if push_m
+                `S2: next_state = (push_m ? `S3 : `S2); // Running -> Paused if push_m
+                `S3: next_state = (push_m ? `S2 : `S3); // Paused -> Running if push_m
+                default: next_state = `S0;
+            endcase
+        end
     end
 
     // Convert time to 7-segment display values (using a 16-bit register)
     always @(*) begin
-        // Seconds
-        segments[15:12] = seconds / 10; // Tens of seconds
-        segments[11:8]  = seconds % 10; // Units of seconds
-
-        // Hundredths of a second
-        segments[7:4]   = hundredths / 10; // Tens of hundredths
-        segments[3:0]   = hundredths % 10; // Units of hundredths
+        if (reset) begin
+            // Seconds
+            segments[15:12] = seconds / 10; // Tens of seconds
+            segments[11:8]  = seconds % 10; // Units of seconds
+    
+            // Hundredths of a second
+            segments[7:4]   = hundredths / 10; // Tens of hundredths
+            segments[3:0]   = hundredths % 10; // Units of hundredths
+        end
     end
 
     // Finish flag handling
-    always @(posedge clk) begin
-        if (!resetn) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
             finish3 <= 0; // Reset the finish flag
         end else if (!SPDT3) begin
             finish3 <= 1; // Set finish flag when SPDT3 is turned off
