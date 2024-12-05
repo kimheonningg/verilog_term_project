@@ -97,23 +97,6 @@ module Main(
     wire finish2;
     wire finish3;
     wire finish4;
-   
-
-    // turn off spdt_leds when it is finished
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            spdt_led <= 0;
-        end
-        else begin
-            case(spdt_service)
-                `SERVICERESET: spdt_led <= 4'b0000;
-                `SERVICE1: spdt_led <= 4'b1000;
-                `SERVICE2: spdt_led <= 4'b0100;
-                `SERVICE3: spdt_led <= 4'b0010;
-                default: spdt_led <= 4'b0000;
-            endcase
-        end
-    end
     
     reg alarm_on;
     reg is_count_state = 0; // 1 if we show count_state
@@ -125,9 +108,8 @@ module Main(
             is_count_state <= 0;
             alarm_on <= 0;
             temp_led <= 0;
-        end else begin
-            if (spdt_service == `SERVICE4) begin
-                case(alarm_state)
+        end else if (spdt_service == `SERVICE4) begin
+            case(alarm_state)
                 3'b000: begin
                     is_count_state <= 0;
                     alarm_on <= 0;
@@ -160,10 +142,16 @@ module Main(
                     led <= 0;
                 end
             endcase
-            end else begin
-                led[13:10] <= spdt_led; // 4 leds above spdt switches
-                led[9:0] <= 0; // 10 leds above mini game switches
-            end
+        end else begin
+            case(spdt_service)
+                `SERVICERESET: spdt_led <= 4'b0000;
+                `SERVICE1: spdt_led <= 4'b1000;
+                `SERVICE2: spdt_led <= 4'b0100;
+                `SERVICE3: spdt_led <= 4'b0010;
+                default: spdt_led <= 4'b0000;
+            endcase
+            led[13:10] <= spdt_led; // 4 leds above spdt switches
+            led[9:0] <= 0; // 10 leds above mini game switches
         end
     end
 
