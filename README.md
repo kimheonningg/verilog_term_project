@@ -22,6 +22,7 @@
       output reg [7:0] seg, // 7-segment control
       output reg [3:0] anode, // 7-segment control
       output [13:0] led, // 4 spdt leds + 10 mini game leds control
+      output reg temp_led, // led for minigame only
       output clk_led // clock led control
 
 `NumArrayTo7SegmentArray`
