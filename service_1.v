@@ -33,6 +33,7 @@ module Service_1_time_set (
 );
 
   reg [1:0] seg; // 3 2 1 0 left to right
+  reg start;
 
   // select segment
   always @(posedge clk or posedge reset) begin
@@ -74,11 +75,21 @@ module Service_1_time_set (
       end
     end
   end
-
+    
   // finish
-  always @(posedge clk or posedge reset) begin
-    if (reset) finish1 <= 0;
-    else if (!spdt1 & sel) finish1 <= 1;
+  always @(posedge clk or posedge reset or posedge spdt1) begin
+    if (reset) begin
+        finish1 <= 0;
+        start <= 0;
+    end else begin
+        if (spdt1) start <= 1;
+        
+        if (finish1) finish1 <= 0;
+        else if (!spdt1 & start) begin
+            finish1 <= 1;
+            start <= 0;
+        end
+    end
   end
 endmodule
 
