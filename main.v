@@ -94,7 +94,7 @@ module Main(
     // turn off spdt_leds when it is finished
     always @(*) begin
         if (finish1 || finish2 || finish3 || finish4) begin
-            spdt_led = 4'b0000; // Finish �긽�깭�뿉�꽌 �걫
+            spdt_led = 4'b0000;
         end else begin
             case(spdt_service)
                 `SERVICERESET: spdt_led = 4'b0000;
@@ -111,13 +111,33 @@ module Main(
     
     reg is_count_state = 0; // 1 if we show count_state
 
+    // store current time and alarm time
+    reg [15:0] current_time; // current time
+    wire [15:0] alarm_time; // alarm time
+
+    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
+
+    wire [3:0] which_seg_on1, which_seg_on2; // one-hot style, tells which location segment is on
+
+    wire [6:0] eSegWire; // wire that connects with eSeg
+
+    // clock tick indicator led signal
+    assign clk_led = clk;
+
+    // wire for the output number array for the 7-segment
+    wire [15:0] num1, num3, num4;
+    
+    // TODO: add initial state 0000, with resetn
+
+    reg [3:0] currentNum;
+
     // handle alarm_state
     always @(alarm_state) begin
         case(alarm_state)
             3'b000: begin
                 is_count_state = 0;
             end
-            3'b000: begin
+            3'b001: begin
                 is_count_state = 0;
             end
             3'b010: begin
@@ -134,21 +154,9 @@ module Main(
         endcase
     end
 
-    // store current time and alarm time
-    reg [15:0] current_time; // current time
-    wire [15:0] alarm_time; // alarm time
-
-    wire [2:0] alarm_state; // state 1. alarm on, state 2. minigame, state 3. alarm off.
-
-    wire [3:0] which_seg_on1, which_seg_on2; // one-hot style, tells which location segment is on
-
-    // clock tick indicator led signal
-    assign clk_led = clk;
-
-    // wire for the output number array for the 7-segment
-    wire [15:0] num1, num3, num4;
-    
-    // TODO: add initial state 0000, with resetn
+    always @(eSegWire) begin 
+        eSeg <= eSegWire;
+    end
 
     // instantiate modules
     Service_1_time_set service_1(
@@ -197,8 +205,6 @@ module Main(
         .finish4(finish4)
     );
 
-    reg [3:0] currentNum;
-
     // update segments
     always @(posedge sClk) begin
         case (iter)
@@ -230,7 +236,7 @@ module Main(
     // use the NumTo7Segment module to convert number to 7-segment
     NumTo7Segment numTo7Seg (
         .number(currentNum),
-        .seg(eSeg)
+        .seg(eSegWire)
     );
 
     // update current_time
