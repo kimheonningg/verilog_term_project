@@ -42,7 +42,6 @@ module Service_3_StopWatch(
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             // Reset all state-related signals 
-            stopwatch_state <= `S0;
             clk_count <= 0;
         end else begin  
             // Stopwatch functionality
