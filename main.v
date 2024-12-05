@@ -114,7 +114,7 @@ module Main(
                     is_count_state <= 0;
                     alarm_on <= 0;
                     temp_led <= 0;
-                    led <= 0;
+                    led[9:0] <= 0;
                 end
                 3'b001: begin
                     is_count_state <= 0;
