@@ -52,13 +52,13 @@ module Main(
     wire sClk;
     wire [1:0] iter; // wire for anode handling
     reg [17:0] counter = 18'd0;
-    assign iter = counter[17:16];
+    assign iter = counter[4:3]; ///////////////////////////////////////////////////////////////////////CHANGED
     always @(posedge clk_osc or posedge reset) begin
         if (reset) counter <= 0;
         else counter <= counter + 1;
     end
 
-    assign sClk = counter[15];
+    assign sClk = counter[2]; ////////////////////////////////////////////////////////////////////////////CHANGED
 
     // connect with make_clk module
     make_clk make_clk_(
