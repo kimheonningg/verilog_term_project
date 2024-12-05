@@ -49,8 +49,10 @@ module Main(
     wire reset;
     wire clk;
 
-    // make sClk
+    // make sClk -> period = 1s
     wire sClk;
+    // make s2Clk -> 2 times sClk, period = 2s
+    wire s2Clk;
     wire [1:0] iter; // wire for anode handling
     reg [17:0] counter = 18'd0;
 
@@ -61,6 +63,8 @@ module Main(
     
     assign sClk = counter[15]; //counter[1];
     assign iter = counter[17:16]; // counter[3:2]
+
+    assign s2Clk = counter[16];
     
     // connect with make_clk module
     make_clk make_clk_(
