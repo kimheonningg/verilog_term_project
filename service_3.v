@@ -44,7 +44,6 @@ module Service_3_StopWatch(
     reg [5:0] seconds;     // Seconds (SS)
     reg [6:0] hundredths;  // 1/100 seconds (ss)
     reg [2:0] stopwatch_state, next_state; // State registers
-    reg running;           // Stopwatch running flag
 
     // State transitions and control logic
     always @(posedge clk or posedge reset) begin
@@ -54,7 +53,6 @@ module Service_3_StopWatch(
             clk_count <= 0;
             seconds <= 0;
             hundredths <= 0;
-            running <= 0;
         end else begin
             stopwatch_state <= next_state;  
             
@@ -65,15 +63,12 @@ module Service_3_StopWatch(
                         // Idle: Reset stopwatch values
                         seconds <= 0;
                         hundredths <= 0;
-                        running <= 0;
                     end
                     `S1: begin
                         // Initialized: Wait for push_m to start
-                        running <= 0;
                     end
                     `S2: begin
                         // Running: Increment counters
-                        running <= 1;
                         if (clk_count == HUNDREDTH_TICK - 1) begin
                             clk_count <= 0;
                             if (hundredths == 99) begin
@@ -92,12 +87,10 @@ module Service_3_StopWatch(
                     end
                     `S3: begin
                         // Paused: Hold current time
-                        running <= 0;
                     end
                 endcase
             end else begin
                 // SPDT3 OFF: Reset LED and stop counters
-                running <= 0;
             end
         end
     end
