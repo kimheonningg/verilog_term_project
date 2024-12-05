@@ -37,6 +37,7 @@
 
 module Service_4(
     input clk,
+    input s2clk,
     input reset,
     input SPDT4, // Buttons
     input [9:0] SPDTs,
@@ -47,9 +48,9 @@ module Service_4(
     
     output [2:0] alarm_state, // state 1. alarm on, state 2. minigame, state 3. alarm off.
     output [15:0] count_state,
-    output [9:0] SPDT_LED,
-    output finish4
+    output [9:0] SPDT_LED
 );
+    wire finish4;
     
     Service_4_alarm_check uut_alarm_check (
         .clk(clk),
@@ -64,7 +65,7 @@ module Service_4(
 
     // Service_4_minigame
     Service_4_minigame uut_minigame (
-        .clk(clk),
+        .s2clk(s2clk),
         .reset(reset),
         .alarm_state(alarm_state),
         .random_led(SPDT_LED),//input
@@ -74,7 +75,7 @@ module Service_4(
     );
     
     Service_4_random uut_random (
-        .clk(clk),
+        .s2clk(s2clk),
         .reset(reset),
         .hot(SPDT_LED)
     );
@@ -115,7 +116,7 @@ endmodule
 
     
 module Service_4_minigame(
-    input clk,
+    input s2clk,
     input reset,
     input [2:0] alarm_state,
     input [9:0] random_led,
@@ -124,14 +125,15 @@ module Service_4_minigame(
     output reg [15:0] count_state,
     output reg mini_game
 );
-    // ????? ???? ????
+    //
     wire cmp_game;
+    reg[9:0] latest_random_led = 0;
 
     // random_led?? SPDTs ??
-    assign cmp_game = (random_led == SPDTs);
-   
+    assign cmp_game = (latest_random_led == SPDTs);
+    
     // Combinational logic for next_count and next_mini_game
-    always @(posedge clk or posedge reset) begin
+    always @(posedge s2clk or posedge reset) begin
         if (reset) begin
             count_state <= `C0;
             mini_game <= 1'b0;
@@ -170,31 +172,44 @@ module Service_4_minigame(
            endcase
         end
     end    
+    
+    always @(posedge s2clk) begin
+        if(reset) begin
+            latest_random_led <= 0;
+        end else begin
+            latest_random_led <=random_led;
+        end            
+    end
 endmodule
 
 
 module Service_4_random
     (
-    input clk,
+    input s2clk,
     input reset,
     output reg [9:0] hot // Declare hot as reg
     );
 
     wire feedback_value;
     wire [3:0] q;    
-    reg [3:0] r_reg = 4'b1011; // LFSR initial value
-
-    always @(posedge clk or posedge reset) begin
-        if (reset)
-            r_reg <=  4'b1011; // Use non-blocking assignment
-        else
-            r_reg <= {r_reg[2:0], feedback_value}; // Shift & feedback
-    end
+    reg [3:0] r_reg = 4'b0011; // LFSR initial value
+    reg [3:0] increment;
 
     assign feedback_value = r_reg[3] ^ r_reg[1]; // Feedback value
+    
+    always @(posedge s2clk or posedge reset) begin
+        if (reset) begin
+            r_reg <=  4'b0011; // Use non-blocking assignment
+            increment <= 4'b0001;
+        end else begin
+            r_reg <= {r_reg[2:0], feedback_value} + increment; // Shift & feedback
+            increment <= (increment == 4'b0001) ? 4'b0011 : 4'b0001;
+        end
+    end
+
     assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
 
-    always @(posedge clk or posedge reset) begin
+    always @(posedge s2clk or posedge reset) begin
         if (reset) hot <= 0;
         else hot <= 10'b0000000001 << q;
     end
