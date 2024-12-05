@@ -108,7 +108,7 @@ module Service_4_alarm_check(
                    default: alarm_state <= `S1;
                endcase
             end
-            else alarm_state = `S0;
+            else alarm_state <= `S0;
         end
     end
 endmodule
@@ -133,8 +133,8 @@ module Service_4_minigame(
     // Combinational logic for next_count and next_mini_game
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            count_state = `C0;
-            mini_game = 1'b0;
+            count_state <= `C0;
+            mini_game <= 1'b0;
         end
         else begin
            case (alarm_state)
@@ -195,7 +195,7 @@ module Service_4_random
     assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
 
     always @(posedge clk or posedge reset) begin
-        if (reset) hot = 0;
-        else hot = 10'b0000000001 << q;
+        if (reset) hot <= 0;
+        else hot <= 10'b0000000001 << q;
     end
 endmodule
