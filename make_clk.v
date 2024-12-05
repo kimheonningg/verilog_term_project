@@ -14,9 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 module make_clk(
     input clk_osc,
-    input reset,
+    input RESET,
     output reg clk,
-    output resetn
+    output reset
     );
     
     
@@ -26,7 +26,7 @@ module make_clk(
     // CLOCK signal
     always @(posedge clk_osc) begin
         // reset
-        if (reset) begin
+        if (RESET) begin
             counter <= 27'd0;
             clk <= 1'b0;
         end
@@ -44,7 +44,7 @@ module make_clk(
     end
     
     // RESET_OUT signal
-    assign resetn = ~reset;
+    assign reset = RESET;
 
 
 endmodule
