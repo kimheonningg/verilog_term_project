@@ -40,7 +40,7 @@ module Service_3_StopWatch(
     
     // State transitions and control logic
     always @(posedge clk or posedge reset) begin
-        if (reset) begin
+        if (reset || ~SPDT3) begin
             // Reset all state-related signals 
             clk_count <= 0;
         end else begin  
@@ -86,8 +86,8 @@ module Service_3_StopWatch(
     end
 
     // Next state logic
-    always @(posedge clk) begin
-        if (reset) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset || !SPDT3) begin
             stopwatch_state <= `S0;
         end else begin
             case (stopwatch_state)
