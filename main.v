@@ -38,6 +38,7 @@ module Main(
     output reg [6:0] eSeg, // 7-segment control
     output reg [3:0] anode, // 7-segment control
     output reg [13:0] led, // 4 spdt leds + 10 mini game leds control
+    output reg temp_led, // led for minigame only
     output clk_led // clock led control
     );
 
@@ -70,7 +71,7 @@ module Main(
 
     // interpret leds
     reg [3:0] spdt_led = 0; // 4 leds above spdt switches
-    wire [9:0] mini_game_led = 0; // 10 leds above mini game switches
+    wire [9:0] mini_game_led; // 10 leds above mini game switches
     
     // assign service buttons 
     wire SPDT1, SPDT2, SPDT3, SPDT4;
@@ -91,28 +92,67 @@ module Main(
     wire finish2;
     wire finish3;
     wire finish4;
+   
 
     // turn off spdt_leds when it is finished
-    always @(*) begin
+    always @(posedge clk or posedge reset) begin
         if (reset) begin
-            spdt_led = 0;
-            led = 0;
+            spdt_led <= 0;
         end
         else begin
-            if (finish1 || finish2 || finish3 || finish4) begin
-                spdt_led = 4'b0000;
+            case(spdt_service)
+                `SERVICERESET: spdt_led <= 4'b0000;
+                `SERVICE1: spdt_led <= 4'b1000;
+                `SERVICE2: spdt_led <= 4'b0100;
+                `SERVICE3: spdt_led <= 4'b0010;
+                `SERVICE4: spdt_led <= 4'b0001;
+                default: spdt_led <= 4'b0000;
+            endcase
+        end
+    end
+    
+    reg alarm_on;
+    
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            led <= 0;
+            is_count_state <= 0;
+            alarm_on <= 0;
+            temp_led <= 0;
+        end else begin
+            if (spdt_service == `SERVICE4) begin
+                case(alarm_state)
+                3'b000: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                3'b001: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                3'b010: begin
+                    is_count_state <= 0;
+                    led <= 14'b11111111111111;
+                    alarm_on <= 1;
+                    temp_led <= 1;
+                end
+                3'b100: begin
+                    is_count_state <= 1;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+                default: begin
+                    is_count_state <= 0;
+                    alarm_on <= 0;
+                    temp_led <= 0;
+                end
+            endcase
             end else begin
-                case(spdt_service)
-                    `SERVICERESET: spdt_led = 4'b0000;
-                    `SERVICE1: spdt_led = 4'b1000;
-                    `SERVICE2: spdt_led = 4'b0100;
-                    `SERVICE3: spdt_led = 4'b0010;
-                    `SERVICE4: spdt_led = 4'b0001;
-                    default: spdt_led = 4'b0000;
-                endcase
+                led[13:10] <= spdt_led; // 4 leds above spdt switches
+                led[9:0] <= 0; // 10 leds above mini game switches
             end
-            led[13:10] = spdt_led; // 4 leds above spdt switches
-            led[9:0] = mini_game_led; // 10 leds above mini game switches
         end
     end
     
@@ -132,39 +172,14 @@ module Main(
     assign clk_led = clk;
 
     // wire for the output number array for the 7-segment
-    wire [15:0] num1, num3, num4;
+    wire [15:0] num3, num4;
     
     // TODO: add initial state 0000, with resetn
 
     reg [3:0] currentNum;
+    wire [3:0] num1;
 
-    // handle alarm_state
-    always @(*) begin
-        if (reset) is_count_state = 0;
-        else begin
-            case(alarm_state)
-                3'b000: begin
-                    is_count_state = 0;
-                end
-                3'b001: begin
-                    is_count_state = 0;
-                end
-                3'b010: begin
-                    is_count_state = 0;
-                    led <= 14'b11111111111111;
-                    eSeg <= 7'b1111111;
-                end
-                3'b100: begin
-                    is_count_state = 1;
-                end
-                default: begin
-                    is_count_state = 0;
-                end
-            endcase
-        end
-    end
-
-    always @(*) begin 
+    always @(posedge clk or posedge reset) begin 
         if (reset) eSeg <= 0;
         else eSeg <= eSegWire;
     end
@@ -216,10 +231,12 @@ module Main(
         .finish4(finish4)
     );
     
-    always @(num1) begin 
-        current_time = num1;
-    end
-
+//    always @(num1) begin 
+//        current_time = num1;
+//    end
+    
+    
+    
     // update segments
     always @(posedge sClk or posedge reset) begin
         if (reset) begin
@@ -229,19 +246,19 @@ module Main(
             case (iter)
                 2'd0: begin // right-est segment
                     anode <= 4'b1110;
-                    currentNum <= SPDT1 ? num1[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : 0));
+                    currentNum <= SPDT1 ? current_time[3:0] : (SPDT3 ? num3[3:0] : (is_count_state ? num4[3:0] : 0));
                 end
                 2'd1: begin
                     anode <= 4'b1101;
-                    currentNum <= SPDT1 ? num1[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : 0));
+                    currentNum <= SPDT1 ? current_time[7:4] : (SPDT3 ? num3[7:4] : (is_count_state ? num4[7:4] : 0));
                 end
                 2'd2: begin
                     anode <= 4'b1011;
-                    currentNum <= SPDT1 ? num1[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : 0));
+                    currentNum <= SPDT1 ? current_time[11:8] : (SPDT3 ? num3[11:8] : (is_count_state ? num4[11:8] : 0));
                 end
                 2'd3: begin // left-est segment
                     anode <= 4'b0111;
-                    currentNum <= SPDT1 ? num1[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : 0));
+                    currentNum <= SPDT1 ? current_time[15:12] : (SPDT3 ? num3[15:12] : (is_count_state ? num4[15:12] : 0));
                 end
                 default: begin
                     anode <= 4'b1111;
@@ -257,25 +274,30 @@ module Main(
     NumTo7Segment numTo7Seg (
         .number(currentNum),
         .reset(reset),
+        .clk_osc(clk_osc),
+        .alarm_on(alarm_on),
         .seg(eSegWire)
     );
-
+    
     // update current_time
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk or posedge reset or posedge finish1) begin
         if (reset) current_time <= 16'd0;
         // if current_time is not undefined, update current_time
         else begin
-            if (current_time == 16'd5959) begin
-                // Reset to 0000 when current_time is 5959 (59:59)
-                current_time <= 16'd0;
-            end else if (current_time[7:0] == 8'd59) begin
-                // If the lower 8 bits of current_time are 59, 
-                // current_time[15:8] + 1 and current_time[7:0] = 0
-                current_time[15:8] <= current_time[15:8] + 1;
-                current_time[7:0] <= 8'd0;
-            end else begin
-                // Otherwise, just do + 1
-                current_time <= current_time + 1;
+            if (finish1) current_time <= num1;
+            else begin
+                if (current_time == 16'd5959) begin
+                    // Reset to 0000 when current_time is 5959 (59:59)
+                    current_time <= 16'd0;
+                end else if (current_time[7:0] == 8'd59) begin
+                    // If the lower 8 bits of current_time are 59, 
+                    // current_time[15:8] + 1 and current_time[7:0] = 0
+                    current_time[15:8] <= current_time[15:8] + 1;
+                    current_time[7:0] <= 8'd0;
+                end else begin
+                    // Otherwise, just do + 1
+                    current_time <= current_time + 1;
+                end
             end
         end
     end
@@ -284,23 +306,26 @@ endmodule
 module NumTo7Segment(
     input [3:0] number,
     input reset,
+    input clk_osc,
+    input alarm_on,
     output reg [6:0] seg
 );
-    always @(*) begin
-        if (reset) seg = 0;
+    always @(posedge clk_osc or posedge reset) begin
+        if (reset) seg <= 0;
+        else if (alarm_on) seg <= 7'b1111111;
         else begin
             case (number)
-                4'b0000: seg = 7'b0111111; // 0
-                4'b0001: seg = 7'b0000110; // 1
-                4'b0010: seg = 7'b1011011; // 2
-                4'b0011: seg = 7'b1001111; // 3
-                4'b0100: seg = 7'b1100110; // 4
-                4'b0101: seg = 7'b1101101; // 5
-                4'b0110: seg = 7'b1111101; // 6
-                4'b0111: seg = 7'b0000111; // 7
-                4'b1000: seg = 7'b1111111; // 8
-                4'b1001: seg = 7'b1101111; // 9
-                default: seg = 7'b0000000; // Blank for invalid input
+                4'b0000: seg <= 7'b0111111; // 0
+                4'b0001: seg <= 7'b0000110; // 1
+                4'b0010: seg <= 7'b1011011; // 2
+                4'b0011: seg <= 7'b1001111; // 3
+                4'b0100: seg <= 7'b1100110; // 4
+                4'b0101: seg <= 7'b1101101; // 5
+                4'b0110: seg <= 7'b1111101; // 6
+                4'b0111: seg <= 7'b0000111; // 7
+                4'b1000: seg <= 7'b1111111; // 8
+                4'b1001: seg <= 7'b1101111; // 9
+                default: seg <= 7'b0000000; // Blank for invalid input
             endcase
         end
     end
