@@ -20,7 +20,7 @@
 
 module Service_2_alarm_set (
     input clk,
-    input resetn,
+    input reset,
     input spdt2,
     input push_u,
     input push_d,
@@ -35,8 +35,8 @@ module Service_2_alarm_set (
   reg [1:0] seg; // 3 2 1 0 left to right
 
   // select segment
-  always @(posedge clk) begin
-    if (!resetn) begin
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
       seg <= 0;
       sel <= 0;
     end
@@ -62,8 +62,8 @@ module Service_2_alarm_set (
   end
 
   // set time
-  always @(posedge clk) begin
-    if (!resetn) begin
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
       alarm <= 0;
     end
     else begin
@@ -78,8 +78,8 @@ module Service_2_alarm_set (
   end
 
   // finish
-  always @(posedge clk) begin
-    if (!resetn) finish2 <= 0;
+  always @(posedge clk or posedge reset) begin
+    if (reset) finish2 <= 0;
     else if (!spdt2 & sel) finish2 <= 1;
   end
 endmodule
