@@ -63,14 +63,13 @@ module Main(
     
     assign sClk = counter[15]; //counter[1];
     assign iter = counter[17:16]; // counter[3:2]
-
-    assign s2Clk = counter[16];
     
     // connect with make_clk module
     make_clk make_clk_(
         .clk_osc(clk_osc),
         .RESET(RESET), 
         .clk(clk),
+        .s2Clk(s2Clk),
         .reset(reset)
     );
 
@@ -173,8 +172,6 @@ module Main(
 
     reg [3:0] currentNum;
     wire [15:0] num1;
-
-    
 
     // instantiate modules
     Service_1_time_set service_1(

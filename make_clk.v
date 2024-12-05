@@ -16,6 +16,7 @@ module make_clk(
     input clk_osc,
     input RESET,
     output reg clk,
+    output reg s2Clk;
     output reset
     );
     
@@ -33,7 +34,10 @@ module make_clk(
         else begin
             // if counter reaches desired timing: 0.5s (= 1s/2)
             // Spartan-3 FPGA Starter Kit Board has a 50 MHz clock oscillator
-            if (counter == 27'd24999999) begin //20
+            if (counter == 27'd49999998) begin
+                s2Clk <= ~s2Clk;   
+            end
+            else if (counter == 27'd24999999) begin //20
                 counter <= 27'd0;    // reset counter
                 clk <= ~clk;    // invert CLOCK
             end
