@@ -36,6 +36,7 @@
 `define RN0
 
 module Service_4(
+    input clk,
     input s2clk,
     input reset,
     input SPDT4, // Buttons
@@ -52,7 +53,7 @@ module Service_4(
     wire finish4;
     
     Service_4_alarm_check uut_alarm_check (
-        .s2clk(s2clk),
+        .s2clk(clk),
         .reset(reset),
         .SPDT4(SPDT4),
         .current(current),
@@ -97,7 +98,7 @@ module Service_4_alarm_check(
     //000 => basic state , 001 => SPDT4 on, 010 => comparator = 1(alarm_on), 100 => minigame
 
     always @(posedge s2clk or posedge reset) begin
-        if (reset || !SPDT4) alarm_state <= `S0;    
+        if (reset|!SPDT4) alarm_state <= `S0;    
         else begin
             if (SPDT4) begin// when time = alarm.
                case(alarm_state)
@@ -125,11 +126,10 @@ module Service_4_minigame(
     output reg mini_game
 );
     //
-    wire cmp_game;
-    reg[9:0] latest_random_led = 0;
-
+//    wire cmp_game;
+    
     // random_led?? SPDTs ??
-    assign cmp_game = (latest_random_led == SPDTs);
+//    assign cmp_game = (random_led == SPDTs);
     
     // Combinational logic for next_count and next_mini_game
     always @(posedge s2clk or posedge reset) begin
@@ -139,22 +139,18 @@ module Service_4_minigame(
         end
         else begin
            case (alarm_state)
-               `S0: begin
-                   count_state <= `C0;
-                   mini_game <=1'b0;
-               end
                `S3: begin
                    case (count_state)
                        `C0: begin
-                           count_state <= cmp_game ? `C1 : `C0;
+                           count_state <= (random_led == SPDTs) ? `C1 : `C0;
                            mini_game <= 1'b0;
                        end
                        `C1: begin
-                           count_state <= cmp_game ? `C2 : `C0;
+                           count_state <= (random_led == SPDTs) ? `C2 : `C0;
                            mini_game <= 1'b0;
                        end
                        `C2: begin
-                           count_state <= cmp_game ? `C3 : `C0;
+                           count_state <= (random_led == SPDTs) ? `C3 : `C0;
                            mini_game <= 1'b0;
                        end
                        `C3: begin
@@ -176,13 +172,6 @@ module Service_4_minigame(
         end
     end    
     
-    always @(posedge s2clk) begin
-        if(reset) begin
-            latest_random_led <= 0;
-        end else begin
-            latest_random_led <=random_led;
-        end            
-    end
 endmodule
 
 
@@ -194,7 +183,7 @@ module Service_4_random
     );
 
     wire feedback_value;
-    wire [3:0] q;    
+    reg [3:0] q;    
     reg [3:0] r_reg = 4'b0011; // LFSR initial value
     reg [3:0] increment;
 
@@ -207,10 +196,11 @@ module Service_4_random
         end else begin
             r_reg <= {r_reg[2:0], feedback_value} + increment; // Shift & feedback
             increment <= (increment == 4'b0001) ? 4'b0011 : 4'b0001;
+            q <= (r_reg >= 4'b1001) ? (r_reg - 4'b1001) : r_reg;
         end
     end
 
-    assign q = (r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
+//    assign q <= (r_reg >= 4'b1001) ? (r_reg - 4'b1001) : r_reg; //(r_reg >= 4'b1001) ? r_reg - 4'b1001 : r_reg; // Adjust q calculation
 
     always @(posedge s2clk or posedge reset) begin
         if (reset) hot <= 0;
