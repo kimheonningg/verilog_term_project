@@ -73,9 +73,11 @@ module Service_1_time_set (
       if (spdt1) begin
         if (sel) begin
             if (push_d) begin
-              num[4*seg+:4] <= (num[4*seg+:4] == 0) ? 9 : num[4*seg+:4] - 1;
+              if (seg[0]) num[4*seg+:4] <= (num[4*seg+:4] == 0) ? 5 : num[4*seg+:4] - 1;
+              else num[4*seg+:4] <= (num[4*seg+:4] == 0) ? 9 : num[4*seg+:4] - 1;
             end else if (push_u) begin
-              num[4*seg+:4] <= (num[4*seg+:4] == 9) ? 0 : num[4*seg+:4] + 1;
+              if (seg[0]) num[4*seg+:4] <= (num[4*seg+:4] == 5) ? 0 : num[4*seg+:4] + 1;
+              else num[4*seg+:4] <= (num[4*seg+:4] == 9) ? 0 : num[4*seg+:4] + 1;
             end
         end
       end
